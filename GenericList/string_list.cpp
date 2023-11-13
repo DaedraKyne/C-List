@@ -2,6 +2,10 @@
 //
 
 #include <iostream>
+#include <stdexcept>
+#include <string>
+
+using namespace std;
 
 #include "string_list.h"
 
@@ -89,6 +93,12 @@ bool List_String::Remove(std::string val) {
 	return RemoveAt(index);
 }
 
+std::string List_String::Get(int index) {
+	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
+
+	return data[index];
+}
+
 
 
 void Main_Test_List_String() {
@@ -119,6 +129,9 @@ void Main_Test_List_String() {
 	std::cout << "List count: " << string_list.Count() << "\n";
 	
 	std::cout << "Current list: " << string_list.ToString() << ".\n";
+
+	std::cout << "Element at index 0: " << string_list.Get(0) << ".\n";
+	std::cout << "Element at index 1: " << string_list.Get(1) << ".\n";
 
 
 }
