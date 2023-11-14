@@ -12,20 +12,20 @@ public:
     List_String& operator=(List_String other); //Copy assignement
 
 
-    int Capacity();
+    int Capacity() const;
     bool Capacity(int new_capacity);
-    int Count();
+    int Count() const;
 
-    std::string ToString();
+    std::string ToString() const;
 
     bool Add(std::string new_val);
-    bool Contains(std::string val);
+    bool Contains(std::string val) const;
     bool RemoveAt(int index);
     
-    int IndexOf(std::string val);
+    int IndexOf(std::string val) const;
     bool Remove(std::string val);
 
-    std::string Get(int index);
+    std::string Get(int index) const;
 
 
 private:

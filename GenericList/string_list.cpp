@@ -42,7 +42,7 @@ List_String& List_String::operator=(List_String other) {
 
 
 
-int List_String::Capacity() { return capacity; }
+int List_String::Capacity() const { return capacity; }
 
 bool List_String::Capacity(int new_capacity) {
 	if (new_capacity < 0) return false; //allowed values must be >= 0
@@ -63,11 +63,9 @@ bool List_String::Capacity(int new_capacity) {
 	return true;
 }
 
-int List_String::Count() {
-	return count;
-}
+int List_String::Count() const { return count; }
 
-std::string List_String::ToString() {
+std::string List_String::ToString() const {
 	if (count == 0) return "";
 	std::string result = "(";
 	for (int i = 0; i < count - 1; i++) {
@@ -88,7 +86,7 @@ bool List_String::Add(std::string new_val) {
 	return true;
 }
 
-bool List_String::Contains(std::string val) {
+bool List_String::Contains(std::string val) const {
 	return IndexOf(val) != -1;
 }
 
@@ -103,7 +101,7 @@ bool List_String::RemoveAt(int index) {
 }
 
 
-int List_String::IndexOf(std::string val) {
+int List_String::IndexOf(std::string val) const {
 	for (int i = 0; i < count; i++) {
 		if (data[i] == val) return i;
 	}
@@ -116,7 +114,7 @@ bool List_String::Remove(std::string val) {
 	return RemoveAt(index);
 }
 
-std::string List_String::Get(int index) {
+std::string List_String::Get(int index) const {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
 	return data[index];
