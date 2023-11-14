@@ -30,7 +30,7 @@ List_String::~List_String() {
 
 //Copy constructor
 List_String::List_String(const List_String& other) : capacity(other.capacity), count(other.count) {
-	data = DeepCopyData(other.data, other.capacity);
+	data = CreateDeepCopy(other.data, other.capacity);
 }
 
 List_String& List_String::operator=(List_String other) {
@@ -54,7 +54,7 @@ bool List_String::Capacity(int new_capacity) {
 		return true;
 	};
 
-	std::string* new_data = DeepCopyData(data, new_capacity, count);
+	std::string* new_data = CreateDeepCopy(data, new_capacity, count);
 
 	delete[] data;
 
@@ -123,7 +123,7 @@ std::string List_String::Get(int index) {
 }
 
 
-std::string* List_String::DeepCopyData(std::string* const& data, size_t const &data_size, size_t const &copy_size) {
+std::string* List_String::CreateDeepCopy(std::string* const& data, size_t const &data_size, size_t const &copy_size) {
 	if (copy_size > data_size || copy_size < 0) {
 		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
 	}
@@ -137,8 +137,8 @@ std::string* List_String::DeepCopyData(std::string* const& data, size_t const &d
 	return new_data;
 }
 
-std::string* List_String::DeepCopyData(std::string* const& data, size_t const& data_size) {
-	return DeepCopyData(data, data_size, data_size);
+std::string* List_String::CreateDeepCopy(std::string* const& data, size_t const& data_size) {
+	return CreateDeepCopy(data, data_size, data_size);
 }
 
 
@@ -152,18 +152,25 @@ void Main_Test_List_String() {
 	std::cout << "Added element: " << s1 << "\n";
 	std::cout << "List count: " << string_list.Count() << "\n";
 
+	std::cout << "\n";
+
 	s1 = "<string>";
 	string_list.Add(s1);
 	std::cout << "Added element: " << s1 << ".\n";
 	std::cout << "List count: " << string_list.Count() << "\n";
 
+	std::cout << "\n";
+
 	std::cout << "Current list: " << string_list.ToString() << ".\n";
 	
+	std::cout << "\n\n";
 
 	s1 = "<string>";
 	string_list.Remove(s1);
 	std::cout << "Removed element: " << s1 << ".\n";
 	std::cout << "List count: " << string_list.Count() << "\n";
+
+	std::cout << "\n";
 
 	s1 = "<T>";
 	string_list.Add(s1);
@@ -175,9 +182,13 @@ void Main_Test_List_String() {
 	std::cout << "Element at index 0: " << string_list.Get(0) << ".\n";
 	std::cout << "Element at index 1: " << string_list.Get(1) << ".\n";
 
+	std::cout << "\n\n";
+
 	List_String copy1(string_list);
 	std::cout << "Copied list using copy constructor.\n";
 	std::cout << "Copied list: " << copy1.ToString() << ".\n";
+
+	std::cout << "\n\n";
 
 	List_String copy2 = string_list;
 	std::cout << "Copied list using copy assignement.\n";

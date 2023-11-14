@@ -33,8 +33,8 @@ private:
     int capacity;
     int count;
 
-    std::string* DeepCopyData(std::string* const& data, size_t const &data_size, size_t const &copy_size);
-    std::string* DeepCopyData(std::string* const &data, size_t const &data_size);
+    std::string* CreateDeepCopy(std::string* const& data, size_t const &data_size, size_t const &copy_size);
+    std::string* CreateDeepCopy(std::string* const &data, size_t const &data_size);
 
 
 };
