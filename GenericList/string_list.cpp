@@ -114,6 +114,10 @@ bool List_String::Remove(const std::string& val) {
 	return RemoveAt(index);
 }
 
+std::string List_String::operator[](const int& index) const {
+	return Get(index);
+}
+
 std::string List_String::Get(const int& index) const {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
@@ -178,7 +182,7 @@ void Main_Test_List_String() {
 	std::cout << "Current list: " << string_list.ToString() << ".\n";
 
 	std::cout << "Element at index 0: " << string_list.Get(0) << ".\n";
-	std::cout << "Element at index 1: " << string_list.Get(1) << ".\n";
+	std::cout << "Element at index 1: " << string_list[1] << ".\n";
 
 	std::cout << "\n\n";
 

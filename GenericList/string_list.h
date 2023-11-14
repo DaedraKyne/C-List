@@ -26,6 +26,7 @@ public:
     int IndexOf(const std::string& val) const;
     bool Remove(const std::string& val);
 
+    std::string operator[](const int& index) const;
     std::string Get(const int& index) const;
 
 
