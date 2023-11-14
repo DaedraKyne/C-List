@@ -44,7 +44,7 @@ List_String& List_String::operator=(List_String other) {
 
 int List_String::Capacity() const { return capacity; }
 
-bool List_String::Capacity(int new_capacity) {
+bool List_String::Capacity(const int& new_capacity) {
 	if (new_capacity < 0) return false; //allowed values must be >= 0
 	if (new_capacity < count) return false; //can't have shorter capacity than element count
 	if (new_capacity == capacity) return true; //no change
@@ -78,7 +78,7 @@ std::string List_String::ToString() const {
 }
 
 
-bool List_String::Add(std::string new_val) {
+bool List_String::Add(const std::string& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
@@ -86,11 +86,11 @@ bool List_String::Add(std::string new_val) {
 	return true;
 }
 
-bool List_String::Contains(std::string val) const {
+bool List_String::Contains(const std::string& val) const {
 	return IndexOf(val) != -1;
 }
 
-bool List_String::RemoveAt(int index) {
+bool List_String::RemoveAt(const int& index) {
 	if (index < 0) return false;
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
@@ -101,7 +101,7 @@ bool List_String::RemoveAt(int index) {
 }
 
 
-int List_String::IndexOf(std::string val) const {
+int List_String::IndexOf(const std::string& val) const {
 	for (int i = 0; i < count; i++) {
 		if (data[i] == val) return i;
 	}
@@ -109,12 +109,12 @@ int List_String::IndexOf(std::string val) const {
 }
 
 
-bool List_String::Remove(std::string val) {
+bool List_String::Remove(const std::string& val) {
 	int index = IndexOf(val);
 	return RemoveAt(index);
 }
 
-std::string List_String::Get(int index) const {
+std::string List_String::Get(const int& index) const {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
 	return data[index];

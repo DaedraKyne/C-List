@@ -1,6 +1,7 @@
 #pragma once
 
 class List_String {
+//note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
 public:
     List_String();
 
@@ -13,19 +14,19 @@ public:
 
 
     int Capacity() const;
-    bool Capacity(int new_capacity);
+    bool Capacity(const int &new_capacity);
     int Count() const;
 
     std::string ToString() const;
 
-    bool Add(std::string new_val);
-    bool Contains(std::string val) const;
-    bool RemoveAt(int index);
+    bool Add(const std::string& new_val);
+    bool Contains(const std::string& val) const;
+    bool RemoveAt(const int& index);
     
-    int IndexOf(std::string val) const;
-    bool Remove(std::string val);
+    int IndexOf(const std::string& val) const;
+    bool Remove(const std::string& val);
 
-    std::string Get(int index) const;
+    std::string Get(const int& index) const;
 
 
 private:
