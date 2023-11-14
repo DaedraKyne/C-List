@@ -4,10 +4,12 @@
 #include <iostream>
 
 #include "string_list.h"
+#include "list.h"
 
 int main()
 {    
     Main_Test_List_String();
+    Main_Test_List();
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
