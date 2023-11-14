@@ -13,9 +13,34 @@ List_String::List_String() : data(nullptr), capacity(0), count(0) {
 
 }
 
+
+void swap(List_String& first, List_String& second) {
+	using std::swap; //fall back to std::swap if swap(T,T) isn't defined
+	//explanation: calling swap makes it unqualified, meaning if swap(T,T) is specially defined, it is called, otherwise, call std::swap(T,T)
+	swap(first.capacity, second.capacity);
+	swap(first.count, second.count);
+	swap(first.data, second.data);
+}
+//Rule of 3
+
+//Destructor
 List_String::~List_String() {
 	delete[] data;
 }
+
+//Copy constructor
+List_String::List_String(const List_String& other) : capacity(other.capacity), count(other.count) {
+	data = DeepCopyData(other.data, other.capacity);
+}
+
+List_String& List_String::operator=(List_String other) {
+	//Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
+	swap(*this, other);
+	return *this;
+}
+
+
+
 
 int List_String::Capacity() { return capacity; }
 
@@ -28,13 +53,9 @@ bool List_String::Capacity(int new_capacity) {
 		data = nullptr;
 		return true;
 	};
-	
-	std::string* new_data = new std::string[new_capacity]; 
 
-	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects)
-	if (count > 0) { //data != nullptr
-		std::copy(data, data + count, new_data);
-	}
+	std::string* new_data = DeepCopyData(data, new_capacity, count);
+
 	delete[] data;
 
 	data = new_data;
@@ -76,7 +97,7 @@ bool List_String::RemoveAt(int index) {
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
 
-	memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow copy to self
+	memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow shuffle left
 	count--;
 	return true;
 }
@@ -99,6 +120,25 @@ std::string List_String::Get(int index) {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
 	return data[index];
+}
+
+
+std::string* List_String::DeepCopyData(std::string* const& data, size_t const &data_size, size_t const &copy_size) {
+	if (copy_size > data_size || copy_size < 0) {
+		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
+	}
+	std::string* new_data = data_size > 0 ? new std::string[data_size] : nullptr;
+
+	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
+	if (copy_size > 0) { //data != nullptr
+		copy(data, data + copy_size, new_data);
+	}
+
+	return new_data;
+}
+
+std::string* List_String::DeepCopyData(std::string* const& data, size_t const& data_size) {
+	return DeepCopyData(data, data_size, data_size);
 }
 
 
@@ -134,6 +174,17 @@ void Main_Test_List_String() {
 
 	std::cout << "Element at index 0: " << string_list.Get(0) << ".\n";
 	std::cout << "Element at index 1: " << string_list.Get(1) << ".\n";
+
+	List_String copy1(string_list);
+	std::cout << "Copied list using copy constructor.\n";
+	std::cout << "Copied list: " << copy1.ToString() << ".\n";
+
+	List_String copy2 = string_list;
+	std::cout << "Copied list using copy assignement.\n";
+	std::cout << "Copied list: " << copy2.ToString() << ".\n";
+
+
+
 
 
 }

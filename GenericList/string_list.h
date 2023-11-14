@@ -3,7 +3,14 @@
 class List_String {
 public:
     List_String();
-    ~List_String();
+
+    friend void swap(List_String& first, List_String& second);
+
+    //Rule of 3
+    ~List_String(); //Destructor
+    List_String(const List_String& other); //Copy Constructor
+    List_String& operator=(List_String other); //Copy assignement
+
 
     int Capacity();
     bool Capacity(int new_capacity);
@@ -25,6 +32,10 @@ private:
     std::string* data;
     int capacity;
     int count;
+
+    std::string* DeepCopyData(std::string* const& data, size_t const &data_size, size_t const &copy_size);
+    std::string* DeepCopyData(std::string* const &data, size_t const &data_size);
+
 
 };
 
