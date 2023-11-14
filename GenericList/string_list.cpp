@@ -24,17 +24,19 @@ bool List_String::Capacity(int new_capacity) {
 	if (new_capacity < count) return false; //can't have shorter capacity than element count
 	if (new_capacity == capacity) return true; //no change
 	if (new_capacity == 0) { //empty non-empty array
-		delete data;
+		delete[] data;
+		data = nullptr;
 		return true;
 	};
 	
-	// general case: dynamic resizing
 	std::string* new_data = new std::string[new_capacity]; 
-	for (int i = 0; i < capacity; i++) {
-		new_data[i] = data[i];
+
+	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects)
+	if (count > 0) { //data != nullptr
+		std::copy(data, data + count, new_data);
 	}
-	//switch data
 	delete[] data;
+
 	data = new_data;
 	capacity = new_capacity;
 	return true;
@@ -74,7 +76,7 @@ bool List_String::RemoveAt(int index) {
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
 
-	std::memmove(data + index, data + index + 1, count - index - 1);
+	memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow copy to self
 	count--;
 	return true;
 }
