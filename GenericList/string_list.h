@@ -12,6 +12,13 @@ public:
     List_String(const List_String& other); //Copy Constructor
     List_String& operator=(const List_String& other); //Copy assignement
 
+    //Rule of 5
+    //R-value references (&&) explained: http://thbecker.net/articles/rvalue_references/section_01.html 
+    //basic explanation: if a function argument is &&, whatever it references will stop existing at the end of the function
+    List_String(List_String&& other);
+    List_String& operator=(List_String&& other);
+
+
 
 
     int Capacity() const;

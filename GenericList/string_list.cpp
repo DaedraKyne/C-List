@@ -36,11 +36,27 @@ List_String::List_String(const List_String& other) : capacity(other.capacity), c
 //Copy assignement
 List_String& List_String::operator=(const List_String& other) {
 	//Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
-	List_String tmp(other);
-	swap(*this, tmp);
-	return *this;
+	//List_String tmp(other);
+	//swap(*this, tmp);
+	//return *this;
+	//clearer definition
+	return *this = List_String(other); //calls operator=(&& List_String(&)))
+	
 }
 
+
+//Rule of 5
+//R-value references (&&) explained: http://thbecker.net/articles/rvalue_references/section_01.html 
+//basic explanation: if a function argument is &&, whatever it references will stop existing at the end of the function
+List_String::List_String(List_String&& other) : data(nullptr), capacity(0), count(0) {
+	swap(*this, other);
+}
+
+List_String& List_String::operator=(List_String&& other) {
+	//warning for future use: might need to do additional cleaning here if currently controlling external objects (since control will be passed over to other and deleted)
+	swap(*this, other);
+	return *this;
+}
 
 
 
