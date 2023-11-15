@@ -34,8 +34,11 @@ public:
     int IndexOf(const std::string& val) const;
     bool Remove(const std::string& val);
 
-    std::string operator[](int index) const;
-    std::string Get(int index) const;
+    const std::string& operator[](int index) const { return Get(index); }
+    std::string& operator[](int index) { return Get(index); }
+    const std::string& Get(int index) const;
+    std::string& Get(int index);
+
 
     //can iterate through list without using iterators if internal data is contiguous
     std::string* begin() const;

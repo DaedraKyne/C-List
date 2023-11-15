@@ -133,11 +133,16 @@ bool List_String::Remove(const std::string& val) {
 	return RemoveAt(index);
 }
 
-std::string List_String::operator[](int index) const {
-	return Get(index);
+
+//Is there really a need to repeat code twice here..? Doesn't feel right
+
+const std::string& List_String::Get(int index) const {
+	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
+
+	return data[index];
 }
 
-std::string List_String::Get(int index) const {
+std::string& List_String::Get(int index) {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
 	return data[index];
@@ -261,5 +266,7 @@ void Main_Test_List_String() {
 	}
 	std::cout << string_list.ToString() << "\n";
 
+	string_list[0] = "hi";
+	std::cout << string_list.ToString() << "\n";
 
 }
