@@ -8,6 +8,7 @@
 using namespace std;
 
 #include "string_list.h"
+#include <cassert>
 
 List_String::List_String() : data(nullptr), capacity(0), count(0) {
 
@@ -247,5 +248,18 @@ void Main_Test_List_String() {
 	for (auto e : string_list) {
 		std::cout << e << "\n";
 	}
+
+	std::cout << "\n\n";
+
+	std::cout << "Testing iteration logic..\n";
+	for (auto& str : string_list) {
+		str += "[processed]";
+	}
+
+	for (const auto& str : string_list) {
+		assert(str.find("[processed]") != std::string::npos);
+	}
+	std::cout << string_list.ToString() << "\n";
+
 
 }
