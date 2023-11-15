@@ -37,6 +37,10 @@ public:
     std::string operator[](int index) const;
     std::string Get(int index) const;
 
+    //can iterate through list without using iterators if internal data is contiguous
+    std::string* begin() const;
+    std::string* end() const;
+
 
 private:
     std::string* data;

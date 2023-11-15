@@ -168,6 +168,16 @@ List_String foo(List_String org) {
 	return tmp;
 }
 
+
+//can iterate through list without using iterators if internal data is contiguous
+std::string* List_String::begin() const {
+	return data;
+}
+std::string* List_String::end() const {
+	return data+count;
+}
+
+
 void Main_Test_List_String() {
 	List_String string_list;
 	std::cout << "List count: " << string_list.Count() << "\n";
@@ -231,8 +241,11 @@ void Main_Test_List_String() {
 	std::cout << "Copied list using move assignement.\n";
 	std::cout << "Copied list: " << copy4.ToString() << ".\n";
 
+	std::cout << "\n\n";
 
-
-
+	std::cout << "Looping through data...\n";
+	for (auto e : string_list) {
+		std::cout << e << "\n";
+	}
 
 }
