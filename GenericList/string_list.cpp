@@ -163,6 +163,11 @@ std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size) {
 
 
 
+List_String foo(List_String org) {
+	List_String tmp(org);
+	return tmp;
+}
+
 void Main_Test_List_String() {
 	List_String string_list;
 	std::cout << "List count: " << string_list.Count() << "\n";
@@ -213,6 +218,18 @@ void Main_Test_List_String() {
 	List_String copy2 = string_list;
 	std::cout << "Copied list using copy assignement.\n";
 	std::cout << "Copied list: " << copy2.ToString() << ".\n";
+
+	std::cout << "\n\n";
+
+	List_String copy3(foo(string_list));
+	std::cout << "Copied list using move constructor.\n";
+	std::cout << "Copied list: " << copy3.ToString() << ".\n";
+
+	std::cout << "\n\n";
+
+	List_String copy4 = foo(string_list);
+	std::cout << "Copied list using move assignement.\n";
+	std::cout << "Copied list: " << copy4.ToString() << ".\n";
 
 
 
