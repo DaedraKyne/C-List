@@ -10,7 +10,7 @@ public:
     //Rule of 3
     ~List_String(); //Destructor
     List_String(const List_String& other); //Copy Constructor
-    List_String& operator=(List_String other); //Copy assignement
+    List_String& operator=(const List_String& other); //Copy assignement
 
 
 

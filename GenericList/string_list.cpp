@@ -33,9 +33,11 @@ List_String::List_String(const List_String& other) : capacity(other.capacity), c
 	data = CreateDeepCopy(other.data, other.capacity);
 }
 
-List_String& List_String::operator=(List_String other) {
+//Copy assignement
+List_String& List_String::operator=(const List_String& other) {
 	//Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
-	swap(*this, other);
+	List_String tmp(other);
+	swap(*this, tmp);
 	return *this;
 }
 
