@@ -60,7 +60,7 @@ bool List<T>::Capacity(const int& new_capacity) {
 		return true;
 	};
 
-	std::string* new_data = CreateDeepCopy(data, new_capacity, count);
+	T* new_data = CreateDeepCopy(data, new_capacity, count);
 
 	delete[] data;
 
@@ -73,16 +73,15 @@ template <typename T>
 int List<T>::Count() const { return count; }
 
 template <typename T>
-std::string List<T>::ToString() const {
-	if (count == 0) return "";
-	std::string result = "(";
-	for (int i = 0; i < count - 1; i++) {
-		result += data[i];
-		result += ", ";
+void List<T>::Print() const {
+	if (count == 0) {
+		std::cout << ""; return;
 	}
-	result += data[count - 1];
-	result += ")";
-	return result;
+	std::cout << "(";
+	for (int i = 0; i < count - 1; i++) {
+		std::cout << data[i] << ", ";
+	}
+	std::cout << data[count - 1] << ")\n";
 }
 
 template <typename T>
@@ -105,7 +104,7 @@ bool List<T>::RemoveAt(const int& index) {
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
 
-	memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow shuffle left
+	memmove(data + index, data + index + 1, (count - index - 1) * sizeof(T)); //shallow shuffle left
 	count--;
 	return true;
 }
@@ -142,7 +141,7 @@ T* List<T>::CreateDeepCopy(T* const& data, size_t const& data_size, size_t const
 	if (copy_size > data_size || copy_size < 0) {
 		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
 	}
-	std::string* new_data = data_size > 0 ? new std::string[data_size] : nullptr;
+	T* new_data = data_size > 0 ? new T[data_size] : nullptr;
 
 	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
 	if (copy_size > 0) { //data != nullptr
@@ -177,7 +176,7 @@ void Main_Test_List() {
 
 	std::cout << "\n";
 
-	std::cout << "Current list: " << string_list.ToString() << ".\n";
+	string_list.Print();
 
 	std::cout << "\n\n";
 
@@ -193,7 +192,7 @@ void Main_Test_List() {
 	std::cout << "Added element: " << s1 << "\n";
 	std::cout << "List count: " << string_list.Count() << "\n";
 
-	std::cout << "Current list: " << string_list.ToString() << ".\n";
+	string_list.Print();
 
 	std::cout << "Element at index 0: " << string_list.Get(0) << ".\n";
 	std::cout << "Element at index 1: " << string_list[1] << ".\n";
@@ -202,15 +201,18 @@ void Main_Test_List() {
 
 	List<std::string> copy1(string_list);
 	std::cout << "Copied list using copy constructor.\n";
-	std::cout << "Copied list: " << copy1.ToString() << ".\n";
+	copy1.Print();
 
 	std::cout << "\n\n";
 
 	List<std::string> copy2 = string_list;
 	std::cout << "Copied list using copy assignement.\n";
-	std::cout << "Copied list: " << copy2.ToString() << ".\n";
+	copy2.Print();
 
 
+	List<int>test;
+	test.Add(5);
+	test.Print();
 
 
 

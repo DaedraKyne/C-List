@@ -18,7 +18,7 @@ public:
     bool Capacity(const int& new_capacity);
     int Count() const;
 
-    std::string ToString() const;
+    void Print() const;
 
     bool Add(const T& new_val);
     bool Contains(const T& val) const;
