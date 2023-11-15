@@ -16,7 +16,6 @@ List_String::List_String() : data(nullptr), capacity(0), count(0) {
 
 
 void swap(List_String& first, List_String& second) {
-	using std::swap; //fall back to std::swap if swap(T,T) isn't defined
 	//explanation: calling swap makes it unqualified, meaning if swap(T,T) is specially defined, it is called, otherwise, call std::swap(T,T)
 	swap(first.capacity, second.capacity);
 	swap(first.count, second.count);
@@ -37,10 +36,11 @@ List_String::List_String(const List_String& other) : capacity(other.capacity), c
 //Copy assignement
 List_String& List_String::operator=(const List_String& other) {
 	//Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
-	//List_String tmp(other);
-	//swap(*this, tmp);
-	//return *this;
-	//clearer definition
+	//Long definition:
+		//List_String tmp(other);
+		//swap(*this, tmp);
+		//return *this;
+	//clearer definition:
 	return *this = List_String(other); //calls operator=(&& List_String(&)))
 	
 }
