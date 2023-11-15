@@ -44,7 +44,7 @@ List_String& List_String::operator=(List_String other) {
 
 int List_String::Capacity() const { return capacity; }
 
-bool List_String::Capacity(const int& new_capacity) {
+bool List_String::Capacity(int new_capacity) {
 	if (new_capacity < 0) return false; //allowed values must be >= 0
 	if (new_capacity < count) return false; //can't have shorter capacity than element count
 	if (new_capacity == capacity) return true; //no change
@@ -90,7 +90,7 @@ bool List_String::Contains(const std::string& val) const {
 	return IndexOf(val) != -1;
 }
 
-bool List_String::RemoveAt(const int& index) {
+bool List_String::RemoveAt(int index) {
 	if (index < 0) return false;
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
@@ -114,18 +114,18 @@ bool List_String::Remove(const std::string& val) {
 	return RemoveAt(index);
 }
 
-std::string List_String::operator[](const int& index) const {
+std::string List_String::operator[](int index) const {
 	return Get(index);
 }
 
-std::string List_String::Get(const int& index) const {
+std::string List_String::Get(int index) const {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
 	return data[index];
 }
 
 
-std::string* List_String::CreateDeepCopy(std::string* const& data, size_t const &data_size, size_t const &copy_size) {
+std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, size_t copy_size) {
 	if (copy_size > data_size || copy_size < 0) {
 		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
 	}
@@ -139,7 +139,7 @@ std::string* List_String::CreateDeepCopy(std::string* const& data, size_t const 
 	return new_data;
 }
 
-std::string* List_String::CreateDeepCopy(std::string* const& data, size_t const& data_size) {
+std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size) {
 	return CreateDeepCopy(data, data_size, data_size);
 }
 

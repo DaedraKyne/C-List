@@ -13,21 +13,22 @@ public:
     List_String& operator=(List_String other); //Copy assignement
 
 
+
     int Capacity() const;
-    bool Capacity(const int &new_capacity);
+    bool Capacity(int new_capacity);
     int Count() const;
 
     std::string ToString() const;
 
     bool Add(const std::string& new_val);
     bool Contains(const std::string& val) const;
-    bool RemoveAt(const int& index);
+    bool RemoveAt(int index);
     
     int IndexOf(const std::string& val) const;
     bool Remove(const std::string& val);
 
-    std::string operator[](const int& index) const;
-    std::string Get(const int& index) const;
+    std::string operator[](int index) const;
+    std::string Get(int index) const;
 
 
 private:
@@ -35,8 +36,8 @@ private:
     int capacity;
     int count;
 
-    static std::string* CreateDeepCopy(std::string* const& data, size_t const &data_size, size_t const &copy_size);
-    static std::string* CreateDeepCopy(std::string* const &data, size_t const &data_size);
+    static std::string* CreateDeepCopy(std::string* data, size_t data_size, size_t copy_size);
+    static std::string* CreateDeepCopy(std::string* data, size_t data_size);
 
 
 };
