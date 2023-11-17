@@ -1,7 +1,7 @@
 #pragma once
 
 class List_String {
-//note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
+    //note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
 public:
     List_String();
 
@@ -30,7 +30,7 @@ public:
     bool Add(const std::string& new_val);
     bool Contains(const std::string& val) const;
     bool RemoveAt(int index);
-    
+
     int IndexOf(const std::string& val) const;
     bool Remove(const std::string& val);
 
@@ -41,8 +41,14 @@ public:
 
 
     //can iterate through list without using iterators if internal data is contiguous
-    std::string* begin() const;
-    std::string* end() const;
+    std::string* begin() { return data; }
+    const std::string* begin() const { return data; } //non-copy version for read-only
+    const std::string* cbegin() const { return data; } //same as above, allows for direct call to cbegin for user who knows they want constant iterators
+    
+    std::string* end() { return data + count; }
+    const std::string* end() const { return data + count; }
+    const std::string* cend() const { return data + count; }
+
 
 
 private:

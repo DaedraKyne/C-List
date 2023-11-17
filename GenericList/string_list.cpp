@@ -173,15 +173,6 @@ List_String foo(List_String org) {
 }
 
 
-//can iterate through list without using iterators if internal data is contiguous
-std::string* List_String::begin() const {
-	return data;
-}
-std::string* List_String::end() const {
-	return data+count;
-}
-
-
 void Main_Test_List_String() {
 	List_String string_list;
 	std::cout << "List count: " << string_list.Count() << "\n";
