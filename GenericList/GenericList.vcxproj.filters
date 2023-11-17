@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="list.cpp">
+    <ClCompile Include="list_test.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="string_list.cpp">
@@ -30,6 +30,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="list.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="list_test.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

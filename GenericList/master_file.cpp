@@ -5,11 +5,18 @@
 
 #include "string_list.h"
 #include "list.h"
+#include "list_test.h"
 
 int main()
 {    
-    Main_Test_List_String();
     Main_Test_List();
+    int l = 5;
+    List<int> test;
+    test.Add(l++);
+    test.Add(l);
+    test.Add(++l);
+    test.Print();
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
