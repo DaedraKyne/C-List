@@ -30,7 +30,7 @@ List_String::~List_String() {
 
 //Copy constructor
 List_String::List_String(const List_String& other) : capacity(other.capacity), count(other.count) {
-	data = CreateDeepCopy(other.data, other.capacity);
+	data = CreateDeepCopy(other.data, other.capacity, other.capacity);
 }
 
 //Copy assignement
@@ -165,11 +165,6 @@ std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, si
 
 	return new_data;
 }
-
-std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size) {
-	return CreateDeepCopy(data, data_size, data_size);
-}
-
 
 
 List_String foo(List_String org) {

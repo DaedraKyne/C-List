@@ -51,7 +51,6 @@ private:
     int count;
 
     static std::string* CreateDeepCopy(std::string* data, size_t data_size, size_t copy_size);
-    static std::string* CreateDeepCopy(std::string* data, size_t data_size);
 
 
 };
