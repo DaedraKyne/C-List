@@ -114,7 +114,10 @@ bool List_String::RemoveAt(int index) {
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
 
-	memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow shuffle left
+	//Since deleting data, make sure to call data's destructor function in some way to ensure internal pointers/etc are deleted too - here, std::move takes care of it
+	//note: this is only safe if std::move is implemented linearly in ascending order, or by using a temporary buffer, otherwise...
+	std::move(data + index + 1, data + count, data + index);
+	//memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow shuffle left
 	count--;
 	return true;
 }
