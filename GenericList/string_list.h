@@ -1,5 +1,11 @@
 #pragma once
 
+#include <iostream>
+#include <stdexcept>
+#include <string>
+#include <memory>
+#include <cassert>
+
 class List_String {
     //note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
 public:
@@ -61,6 +67,8 @@ private:
     std::string* data;
     int capacity;
     int count;
+
+    static std::allocator<std::string> dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
 
     static std::string* CreateDeepCopy(std::string* data, size_t data_size, size_t copy_size);
 

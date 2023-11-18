@@ -4,11 +4,14 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <memory>
+#include <cassert>
 
 using namespace std;
 
-#include "string_list.h"
-#include <cassert>
+#include "string_list.h"'
+
+std::allocator<std::string> List_String::dataAllocator;
 
 List_String::List_String() : data(nullptr), capacity(0), count(0) {
 
@@ -25,7 +28,10 @@ void swap(List_String& first, List_String& second) {
 
 //Destructor
 List_String::~List_String() {
-	delete[] data;
+	for (int i = 0; i < count; i++) {
+		data[i].~string();
+	}
+	dataAllocator.deallocate(data, capacity);
 }
 
 //Copy constructor
@@ -67,15 +73,17 @@ void List_String::Capacity(int new_capacity) {
 	if (new_capacity < 0) return; //allowed values must be >= 0
 	if (new_capacity < count) return; //can't have shorter capacity than element count
 	if (new_capacity == capacity) return; //no change
-	if (new_capacity == 0) { //empty non-empty array
-		delete[] data;
+	if (new_capacity == 0) { //empty non-empty array with no data
+		dataAllocator.deallocate(data, capacity); //no need to destruct anything since no constructed data exists
 		data = nullptr;
 		return;
 	};
 
-	std::string* new_data = CreateDeepCopy(data, new_capacity, count);
+	std::string* new_data = dataAllocator.allocate(new_capacity);
+	new (new_data) std::string[count];
+	std::move(data, data + count, new_data);
 
-	delete[] data;
+	dataAllocator.deallocate(data, capacity);
 
 	data = new_data;
 	capacity = new_capacity;
@@ -100,12 +108,14 @@ void List_String::Add(const std::string& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
+	new (data + count) std::string; //construct new string since new_val is passed by reference
 	data[count++] = new_val;
 }
 void List_String::Add(std::string&& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
+	new (data + count) std::string; //construct new string since new_val is passed by reference
 	data[count++] = std::move(new_val);
 }
 
@@ -119,6 +129,7 @@ bool List_String::RemoveAt(int index) {
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
 
+	data[index].~string();
 	//Since deleting data, make sure to call data's destructor function in some way to ensure internal pointers/etc are deleted too - here, std::move takes care of it
 	//note: this is only safe if std::move is implemented linearly in ascending order, or by using a temporary buffer, otherwise...
 	std::move(data + index + 1, data + count, data + index);
@@ -161,7 +172,8 @@ std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, si
 	if (copy_size > data_size || copy_size < 0) {
 		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
 	}
-	std::string* new_data = data_size > 0 ? new std::string[data_size] : nullptr;
+	std::string* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr;
+	new (new_data) std::string[copy_size];
 
 	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
 	if (copy_size > 0) { //data != nullptr
