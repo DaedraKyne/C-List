@@ -115,6 +115,7 @@ void List_String::Add(std::string&& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
+	//question: is there a way of moving new_val to data[count] without first constructing data[count]?
 	new (data + count) std::string; //construct new string since new_val is passed by reference
 	data[count++] = std::move(new_val);
 }
