@@ -30,6 +30,8 @@ public:
     std::string ToString() const;
 
     void Add(const std::string& new_val);
+    void Add(std::string&& new_val);
+
     bool Contains(const std::string& val) const;
     bool RemoveAt(int index);
 

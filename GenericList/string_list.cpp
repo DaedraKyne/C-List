@@ -79,7 +79,6 @@ void List_String::Capacity(int new_capacity) {
 
 	data = new_data;
 	capacity = new_capacity;
-	return;
 }
 
 int List_String::Count() const { return count; }
@@ -102,8 +101,14 @@ void List_String::Add(const std::string& new_val) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
 	data[count++] = new_val;
-	return;
 }
+void List_String::Add(std::string&& new_val) {
+	if (capacity < count + 1) {
+		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
+	}
+	data[count++] = std::move(new_val);
+}
+
 
 bool List_String::Contains(const std::string& val) const {
 	return IndexOf(val) != -1;
@@ -256,6 +261,9 @@ void Main_Test_List_String() {
 	std::cout << string_list.ToString() << "\n";
 
 	string_list[0] = "hi";
+	std::cout << string_list.ToString() << "\n";
+
+	string_list.Add("bob");
 	std::cout << string_list.ToString() << "\n";
 
 }
