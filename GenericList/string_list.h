@@ -22,16 +22,20 @@ public:
 
 
     int Capacity() const;
-    bool Capacity(int new_capacity);
     int Count() const;
+
+    //Sets the capacity of the internal array to new_capacity. If new_capacity is smaller than Count, do nothing.
+    void Capacity(int new_capacity);
 
     std::string ToString() const;
 
-    bool Add(const std::string& new_val);
+    void Add(const std::string& new_val);
     bool Contains(const std::string& val) const;
     bool RemoveAt(int index);
 
     int IndexOf(const std::string& val) const;
+
+    //Returns true if a relevant element exists, and removes it.
     bool Remove(const std::string& val);
 
     const std::string& operator[](int index) const { return Get(index); }

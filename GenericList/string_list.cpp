@@ -63,14 +63,14 @@ List_String& List_String::operator=(List_String&& other) {
 
 int List_String::Capacity() const { return capacity; }
 
-bool List_String::Capacity(int new_capacity) {
-	if (new_capacity < 0) return false; //allowed values must be >= 0
-	if (new_capacity < count) return false; //can't have shorter capacity than element count
-	if (new_capacity == capacity) return true; //no change
+void List_String::Capacity(int new_capacity) {
+	if (new_capacity < 0) return; //allowed values must be >= 0
+	if (new_capacity < count) return; //can't have shorter capacity than element count
+	if (new_capacity == capacity) return; //no change
 	if (new_capacity == 0) { //empty non-empty array
 		delete[] data;
 		data = nullptr;
-		return true;
+		return;
 	};
 
 	std::string* new_data = CreateDeepCopy(data, new_capacity, count);
@@ -79,7 +79,7 @@ bool List_String::Capacity(int new_capacity) {
 
 	data = new_data;
 	capacity = new_capacity;
-	return true;
+	return;
 }
 
 int List_String::Count() const { return count; }
@@ -97,12 +97,12 @@ std::string List_String::ToString() const {
 }
 
 
-bool List_String::Add(const std::string& new_val) {
+void List_String::Add(const std::string& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
 	data[count++] = new_val;
-	return true;
+	return;
 }
 
 bool List_String::Contains(const std::string& val) const {
