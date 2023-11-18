@@ -80,8 +80,10 @@ void List_String::Capacity(int new_capacity) {
 	};
 
 	std::string* new_data = dataAllocator.allocate(new_capacity);
-	new (new_data) std::string[count];
-	std::move(data, data + count, new_data);
+
+	for (int i = 0; i < count; i++) {
+		new (new_data + i) std::string(std::move(data[i]));
+	}
 
 	dataAllocator.deallocate(data, capacity);
 
@@ -108,16 +110,14 @@ void List_String::Add(const std::string& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
-	new (data + count) std::string; //construct new string since new_val is passed by reference
-	data[count++] = new_val;
+	new (data + count++) std::string(std::forward<const std::string>(new_val)); //construct new string, pass new_val as const lvalue
 }
 void List_String::Add(std::string&& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
 	//question: is there a way of moving new_val to data[count] without first constructing data[count]?
-	new (data + count) std::string; //construct new string since new_val is passed by reference
-	data[count++] = std::move(new_val);
+	new (data + count++) std::string(std::forward<std::string>(new_val)); //construct new string, pass new_val as rvalue
 }
 
 
@@ -174,11 +174,11 @@ std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, si
 		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
 	}
 	std::string* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr;
-	new (new_data) std::string[copy_size];
+
 
 	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
-	if (copy_size > 0) { //data != nullptr
-		copy(data, data + copy_size, new_data);
+	for (int i = 0; i < copy_size; i++) {
+		new (new_data + i) std::string(data[i]);
 	}
 
 	return new_data;
