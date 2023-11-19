@@ -16,7 +16,6 @@ using namespace std;
 
 template <typename T>
 class List {
-    //note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
 public:
     List() : data(nullptr), capacity(0), count(0) {
 
@@ -44,12 +43,11 @@ public:
     }
     //Copy assignement
     List& operator=(const List& other) {
-        //Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
         return *this = List(other);
     }
 
     //Move Constructor
-    List(List&& other) {
+    List(List&& other) : data(nullptr), capacity(0), count(0) {
         swap(*this, other);
     }
     //Move Assignement
@@ -65,19 +63,19 @@ public:
     void Capacity(size_t new_capacity) {
         if (new_capacity < count) return; //can't have shorter capacity than element count
         if (new_capacity == capacity) return; //no change
-        if (new_capacity == 0) { //empty non-empty array
+        if (new_capacity == 0) { //empty non-empty array with no initialized elements
             dataAllocator.deallocate(data, capacity);
             data = nullptr;
             return;
         };
 
-        T* new_data = dataAllocator.allocate(new_capacity);
+        T* new_data = dataAllocator.allocate(new_capacity); //allocate new memory
 
         for (size_t i = 0; i < count; i++) {
-            new (new_data + i) T(std::move(data[i]));
+            new (new_data + i) T(std::move(data[i])); //transfer data without temporary copies
         }
 
-        dataAllocator.deallocate(data, capacity);
+        dataAllocator.deallocate(data, capacity); //deallocate old memory
 
         data = new_data;
         capacity = new_capacity;
@@ -99,14 +97,14 @@ public:
         if (capacity < count + 1) {
             Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
         }
-        new (data + count++) T(std::forward<const T>(new_val));
+        new (data + count++) T(std::forward<const T>(new_val)); //construct new data as copy of old data
     }
 
     void Add(T&& new_val) {
         if (capacity < count + 1) {
             Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
         }
-        new (data + count++) T(std::forward<T>(new_val));
+        new (data + count++) T(std::forward<T>(new_val)); //construct new data by moving old data
     }
 
     bool Contains(const T& val) const {
@@ -116,8 +114,8 @@ public:
     bool RemoveAt(size_t index) {
         if (index >= count) return false;
         //allowed setting: index = [0, count-1], count > 0 (data is initialized)
-        data[index].~string();
-        std::move(data + index + 1, data + count, data + index);
+        data[index].~string(); //destruct element
+        std::move(data + index + 1, data + count, data + index); //shuffle-move data left by 1
         count--;
         return true;
     }
@@ -138,11 +136,11 @@ public:
     T& operator[](size_t index) { return Get(index); }
     
     const T& Get(size_t index) const {
-        if (index >= count) throw std::out_of_range("");
+        if (index >= count) throw std::out_of_range(""); //do we remove this line and let user deal with errors from incorrect indexing?
         return data[index];
     }
     T& Get(size_t index) {
-        if (index >= count) throw std::out_of_range("");
+        if (index >= count) throw std::out_of_range(""); //do we remove this line and let user deal with errors from incorrect indexing?
         return data[index];
     }
 
@@ -161,17 +159,17 @@ private:
     size_t capacity;
     size_t count;
 
-    static inline std::allocator<T> dataAllocator;
+    static inline std::allocator<T> dataAllocator; //any allocator can allocate/deallocate any data, so not necessary to keep an allocator specifically for List, but avoids having to instantiate one each time
 
     static T* CreateDeepCopy(T* const& data, size_t data_size, size_t copy_size) {
         if (copy_size > data_size) {
             return nullptr;
         }
-        T* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr;
+        T* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr; //allocate new data
 
         //For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
         for (size_t i = 0; i < copy_size; i++) {
-            new (new_data + i) T(data[i]);
+            new (new_data + i) T(data[i]); //create new copy of old data's element
         }
 
         return new_data;
