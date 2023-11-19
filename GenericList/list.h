@@ -6,6 +6,7 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <memory>
 
 using namespace std;
 
@@ -22,7 +23,6 @@ public:
     }
 
     friend void swap(List<T>& first, List<T>& second) {
-        using std::swap; //fall back to std::swap if swap(T,T) isn't defined
         //explanation: calling swap makes it unqualified, meaning if swap(T,T) is specially defined, it is called, otherwise, call std::swap(T,T)
         swap(first.capacity, second.capacity);
         swap(first.count, second.count);
@@ -33,121 +33,151 @@ public:
  
     //Destructor
     ~List() {
-        delete[] data;
+        for (size_t i = 0; i < count; i++) {
+            data[i].~T();
+        }
+        dataAllocator.deallocate(data, capacity);
     }
     //Copy Constructor
     List(const List& other) : capacity(other.capacity), count(other.count) {
         data = CreateDeepCopy(other.data, other.capacity, other.count);
     }
     //Copy assignement
-    List& operator=(List other) {
+    List& operator=(const List& other) {
         //Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
+        return *this = List(other);
+    }
+
+    //Move Constructor
+    List(List&& other) {
+        swap(*this, other);
+    }
+    //Move Assignement
+    List& operator=(List&& other) {
         swap(*this, other);
         return *this;
     }
 
 
-    int Capacity() const { return capacity; }
-    bool Capacity(const int& new_capacity) {
-        if (new_capacity < 0) return false; //allowed values must be >= 0
-        if (new_capacity < count) return false; //can't have shorter capacity than element count
-        if (new_capacity == capacity) return true; //no change
+    size_t Capacity() const { return capacity; }
+    size_t Count() const { return count; }
+
+    void Capacity(size_t new_capacity) {
+        if (new_capacity < count) return; //can't have shorter capacity than element count
+        if (new_capacity == capacity) return; //no change
         if (new_capacity == 0) { //empty non-empty array
-            delete[] data;
+            dataAllocator.deallocate(data, capacity);
             data = nullptr;
-            return true;
+            return;
         };
 
-        T* new_data = CreateDeepCopy(data, new_capacity, count);
+        T* new_data = dataAllocator.allocate(new_capacity);
 
-        delete[] data;
+        for (size_t i = 0; i < count; i++) {
+            new (new_data + i) T(std::move(data[i]));
+        }
+
+        dataAllocator.deallocate(data, capacity);
 
         data = new_data;
         capacity = new_capacity;
-        return true;
     }
 
-    int Count() const { return count; }
 
     void Print() const {
         if (count == 0) {
             std::cout << ""; return;
         }
         std::cout << "(";
-        for (int i = 0; i < count - 1; i++) {
+        for (size_t i = 0; i < count - 1; i++) {
             std::cout << data[i] << ", ";
         }
         std::cout << data[count - 1] << ")\n";
     }
 
-    bool Add(const T& new_val) {
+    void Add(const T& new_val) {
         if (capacity < count + 1) {
             Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
         }
-        data[count++] = new_val;
-        return true;
+        new (data + count++) T(std::forward<const T>(new_val));
+    }
+
+    void Add(T&& new_val) {
+        if (capacity < count + 1) {
+            Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
+        }
+        new (data + count++) T(std::forward<T>(new_val));
     }
 
     bool Contains(const T& val) const {
         return IndexOf(val) != -1;
     }
 
-    bool RemoveAt(const int& index) {
-        if (index < 0) return false;
+    bool RemoveAt(size_t index) {
         if (index >= count) return false;
         //allowed setting: index = [0, count-1], count > 0 (data is initialized)
-
-        memmove(data + index, data + index + 1, (count - index - 1) * sizeof(T)); //shallow shuffle left
+        data[index].~string();
+        std::move(data + index + 1, data + count, data + index);
         count--;
         return true;
     }
 
-    int IndexOf(const T& val) const {
-        for (int i = 0; i < count; i++) {
+    size_t IndexOf(const T& val) const {
+        for (size_t i = 0; i < count; i++) {
             if (data[i] == val) return i;
         }
         return -1;
     }
 
     bool Remove(const T& val) {
-        int index = IndexOf(val);
+        size_t index = IndexOf(val);
         return RemoveAt(index);
     }
 
-    T operator[](const int& index) const {
-        return Get(index);
+    const T& operator[](size_t index) const { return Get(index); }
+    T& operator[](size_t index) { return Get(index); }
+    
+    const T& Get(size_t index) const {
+        if (index >= count) throw std::out_of_range("");
+        return data[index];
     }
-
-    T Get(const int& index) const {
-        if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
-
+    T& Get(size_t index) {
+        if (index >= count) throw std::out_of_range("");
         return data[index];
     }
 
 
+    T* begin() { return data; }
+    const T* begin() const { return data; }
+    const T* cbegin() const { return data; }
+
+    T* end() { return data + count; }
+    const T* end() const { return data + count; }
+    const T* cend() const { return data + count; }
+
+
 private:
     T* data;
-    int capacity;
-    int count;
+    size_t capacity;
+    size_t count;
 
-    static T* CreateDeepCopy(T* const& data, size_t const& data_size, size_t const& copy_size) {
-        if (copy_size > data_size || copy_size < 0) {
-            throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
+    static inline std::allocator<T> dataAllocator;
+
+    static T* CreateDeepCopy(T* const& data, size_t data_size, size_t copy_size) {
+        if (copy_size > data_size) {
+            return nullptr;
         }
-        T* new_data = data_size > 0 ? new T[data_size] : nullptr;
+        T* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr;
 
         //For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
-        if (copy_size > 0) { //data != nullptr
-            copy(data, data + copy_size, new_data);
+        for (size_t i = 0; i < copy_size; i++) {
+            new (new_data + i) T(data[i]);
         }
 
         return new_data;
     }
 
 };
-
-//void Main_Test_List();
-
 
 
 #endif // !_LIST_H
