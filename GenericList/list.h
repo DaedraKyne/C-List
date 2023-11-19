@@ -114,7 +114,7 @@ public:
     bool RemoveAt(size_t index) {
         if (index >= count) return false;
         //allowed setting: index = [0, count-1], count > 0 (data is initialized)
-        data[index].~string(); //destruct element
+        data[index].~T(); //destruct element
         std::move(data + index + 1, data + count, data + index); //shuffle-move data left by 1
         count--;
         return true;
