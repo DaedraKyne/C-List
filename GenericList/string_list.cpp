@@ -4,10 +4,14 @@
 #include <iostream>
 #include <stdexcept>
 #include <string>
+#include <memory>
+#include <cassert>
 
 using namespace std;
 
-#include "string_list.h"
+#include "string_list.h"'
+
+std::allocator<std::string> List_String::dataAllocator;
 
 List_String::List_String() : data(nullptr), capacity(0), count(0) {
 
@@ -15,7 +19,6 @@ List_String::List_String() : data(nullptr), capacity(0), count(0) {
 
 
 void swap(List_String& first, List_String& second) {
-	using std::swap; //fall back to std::swap if swap(T,T) isn't defined
 	//explanation: calling swap makes it unqualified, meaning if swap(T,T) is specially defined, it is called, otherwise, call std::swap(T,T)
 	swap(first.capacity, second.capacity);
 	swap(first.count, second.count);
@@ -25,42 +28,67 @@ void swap(List_String& first, List_String& second) {
 
 //Destructor
 List_String::~List_String() {
-	delete[] data;
+	for (int i = 0; i < count; i++) {
+		data[i].~string();
+	}
+	dataAllocator.deallocate(data, capacity);
 }
 
 //Copy constructor
 List_String::List_String(const List_String& other) : capacity(other.capacity), count(other.count) {
-	data = CreateDeepCopy(other.data, other.capacity);
+	data = CreateDeepCopy(other.data, other.capacity, other.capacity);
 }
 
-List_String& List_String::operator=(List_String other) {
+//Copy assignement
+List_String& List_String::operator=(const List_String& other) {
 	//Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
+	//Long definition:
+		//List_String tmp(other);
+		//swap(*this, tmp);
+		//return *this;
+	//clearer definition:
+	return *this = List_String(other); //calls operator=(&& List_String(&)))
+	
+}
+
+
+//Rule of 5
+//R-value references (&&) explained: http://thbecker.net/articles/rvalue_references/section_01.html 
+//basic explanation: if a function argument is &&, whatever it references will stop existing at the end of the function
+List_String::List_String(List_String&& other) : data(nullptr), capacity(0), count(0) {
+	swap(*this, other);
+}
+
+List_String& List_String::operator=(List_String&& other) {
+	//warning for future use: might need to do additional cleaning here if currently controlling external objects (since control will be passed over to other and deleted)
 	swap(*this, other);
 	return *this;
 }
 
 
 
-
 int List_String::Capacity() const { return capacity; }
 
-bool List_String::Capacity(const int& new_capacity) {
-	if (new_capacity < 0) return false; //allowed values must be >= 0
-	if (new_capacity < count) return false; //can't have shorter capacity than element count
-	if (new_capacity == capacity) return true; //no change
-	if (new_capacity == 0) { //empty non-empty array
-		delete[] data;
+void List_String::Capacity(int new_capacity) {
+	if (new_capacity < 0) return; //allowed values must be >= 0
+	if (new_capacity < count) return; //can't have shorter capacity than element count
+	if (new_capacity == capacity) return; //no change
+	if (new_capacity == 0) { //empty non-empty array with no data
+		dataAllocator.deallocate(data, capacity); //no need to destruct anything since no constructed data exists
 		data = nullptr;
-		return true;
+		return;
 	};
 
-	std::string* new_data = CreateDeepCopy(data, new_capacity, count);
+	std::string* new_data = dataAllocator.allocate(new_capacity);
 
-	delete[] data;
+	for (int i = 0; i < count; i++) {
+		new (new_data + i) std::string(std::move(data[i]));
+	}
+
+	dataAllocator.deallocate(data, capacity);
 
 	data = new_data;
 	capacity = new_capacity;
-	return true;
 }
 
 int List_String::Count() const { return count; }
@@ -78,24 +106,35 @@ std::string List_String::ToString() const {
 }
 
 
-bool List_String::Add(const std::string& new_val) {
+void List_String::Add(const std::string& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
-	data[count++] = new_val;
-	return true;
+	new (data + count++) std::string(std::forward<const std::string>(new_val)); //construct new string, pass new_val as const lvalue
 }
+void List_String::Add(std::string&& new_val) {
+	if (capacity < count + 1) {
+		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
+	}
+	//question: is there a way of moving new_val to data[count] without first constructing data[count]?
+	new (data + count++) std::string(std::forward<std::string>(new_val)); //construct new string, pass new_val as rvalue
+}
+
 
 bool List_String::Contains(const std::string& val) const {
 	return IndexOf(val) != -1;
 }
 
-bool List_String::RemoveAt(const int& index) {
+bool List_String::RemoveAt(int index) {
 	if (index < 0) return false;
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
 
-	memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow shuffle left
+	data[index].~string();
+	//Since deleting data, make sure to call data's destructor function in some way to ensure internal pointers/etc are deleted too - here, std::move takes care of it
+	//note: this is only safe if std::move is implemented linearly in ascending order, or by using a temporary buffer, otherwise...
+	std::move(data + index + 1, data + count, data + index);
+	//memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow shuffle left
 	count--;
 	return true;
 }
@@ -114,35 +153,42 @@ bool List_String::Remove(const std::string& val) {
 	return RemoveAt(index);
 }
 
-std::string List_String::operator[](const int& index) const {
-	return Get(index);
+
+//Is there really a need to repeat code twice here..? Doesn't feel right
+
+const std::string& List_String::Get(int index) const {
+	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
+
+	return data[index];
 }
 
-std::string List_String::Get(const int& index) const {
+std::string& List_String::Get(int index) {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
 	return data[index];
 }
 
 
-std::string* List_String::CreateDeepCopy(std::string* const& data, size_t const &data_size, size_t const &copy_size) {
+std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, size_t copy_size) {
 	if (copy_size > data_size || copy_size < 0) {
 		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
 	}
-	std::string* new_data = data_size > 0 ? new std::string[data_size] : nullptr;
+	std::string* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr;
+
 
 	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
-	if (copy_size > 0) { //data != nullptr
-		copy(data, data + copy_size, new_data);
+	for (int i = 0; i < copy_size; i++) {
+		new (new_data + i) std::string(data[i]);
 	}
 
 	return new_data;
 }
 
-std::string* List_String::CreateDeepCopy(std::string* const& data, size_t const& data_size) {
-	return CreateDeepCopy(data, data_size, data_size);
-}
 
+List_String foo(List_String org) {
+	List_String tmp(org);
+	return tmp;
+}
 
 
 void Main_Test_List_String() {
@@ -196,8 +242,41 @@ void Main_Test_List_String() {
 	std::cout << "Copied list using copy assignement.\n";
 	std::cout << "Copied list: " << copy2.ToString() << ".\n";
 
+	std::cout << "\n\n";
 
+	List_String copy3(foo(string_list));
+	std::cout << "Copied list using move constructor.\n";
+	std::cout << "Copied list: " << copy3.ToString() << ".\n";
 
+	std::cout << "\n\n";
 
+	List_String copy4 = foo(string_list);
+	std::cout << "Copied list using move assignement.\n";
+	std::cout << "Copied list: " << copy4.ToString() << ".\n";
+
+	std::cout << "\n\n";
+
+	std::cout << "Looping through data...\n";
+	for (auto e : string_list) {
+		std::cout << e << "\n";
+	}
+
+	std::cout << "\n\n";
+
+	std::cout << "Testing iteration logic..\n";
+	for (auto& str : string_list) {
+		str += "[processed]";
+	}
+
+	for (const auto& str : string_list) {
+		assert(str.find("[processed]") != std::string::npos);
+	}
+	std::cout << string_list.ToString() << "\n";
+
+	string_list[0] = "hi";
+	std::cout << string_list.ToString() << "\n";
+
+	string_list.Add("bob");
+	std::cout << string_list.ToString() << "\n";
 
 }
