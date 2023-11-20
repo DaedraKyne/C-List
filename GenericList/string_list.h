@@ -25,7 +25,8 @@ public:
     List_String& operator=(List_String&& other);
 
 
-
+    //Remove all elements - maintain capacity
+    void Clear();
 
     int Capacity() const;
     int Count() const;

@@ -28,9 +28,7 @@ void swap(List_String& first, List_String& second) {
 
 //Destructor
 List_String::~List_String() {
-	for (int i = 0; i < count; i++) {
-		data[i].~string();
-	}
+	Clear();
 	dataAllocator.deallocate(data, capacity);
 }
 
@@ -63,11 +61,18 @@ List_String::List_String(List_String&& other) : data(other.data), capacity(other
 }
 
 List_String& List_String::operator=(List_String&& other) {
-	List_string tmp(std::move(other));
+	List_String tmp(std::move(other));
 	swap(*this, tmp);
 	return *this;
+	//old *this data is deleted automatically at function end (through temp destruction)
 }
 
+
+void List_String::Clear() {
+	for (int i = 0; i < count; i++) {
+		data[i].~string();
+	}
+}
 
 
 int List_String::Capacity() const { return capacity; }
@@ -109,21 +114,6 @@ std::string List_String::ToString() const {
 }
 
 
-void List_String::Add(const std::string& new_val) {
-	if (capacity < count + 1) {
-		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
-	}
-	new (data + count++) std::string(new_val); //construct new string, pass new_val as const lvalue
-}
-void List_String::Add(std::string&& new_val) {
-	if (capacity < count + 1) {
-		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
-	}
-	//question: is there a way of moving new_val to data[count] without first constructing data[count]?
-	new (data + count++) std::string(std::move(new_val)); //construct new string, pass new_val as rvalue
-}
-
-
 bool List_String::Contains(const std::string& val) const {
 	return IndexOf(val) != -1;
 }
@@ -152,8 +142,6 @@ bool List_String::Remove(const std::string& val) {
 	return RemoveAt(index);
 }
 
-
-//Is there really a need to repeat code twice here..? Doesn't feel right
 
 const std::string& List_String::Get(int index) const {
 	if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
