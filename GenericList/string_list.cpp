@@ -162,7 +162,7 @@ std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, si
 }
 
 void List_String::Resize(int new_capacity) {
-	if (new_capacity < count) return; //no change
+	assert(new_capacity >= count); //asserts get removed in release builds
 
 	std::string* new_data = dataAllocator.allocate(new_capacity);
 	const auto end = data + count;
