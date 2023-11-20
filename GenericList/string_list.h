@@ -39,6 +39,7 @@ public:
 
     std::string ToString() const;
 
+    //Take in any amount of arguments of any type, then unpack on element construction - allows for creating new data without checking for logic errors (the compiler and the element's constructor will take care of that)
     template<typename... Args>
     void Add(Args&&... args) {
         if (capacity == count) Capacity(std::max(2 * capacity, 1));
@@ -58,8 +59,8 @@ public:
     //Returns true if a relevant element exists, and removes it.
     bool Remove(const std::string& val);
 
-    const std::string& operator[](int index) const { return data[index]; }
-    std::string& operator[](int index) { return data[index]; }
+    const std::string& operator[](int index) const { return data[index]; } //read-only
+    std::string& operator[](int index) { return data[index]; } //read+(later)write
     const std::string& Get(int index) const;
     std::string& Get(int index);
 

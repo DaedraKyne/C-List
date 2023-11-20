@@ -41,6 +41,7 @@ List_String& List_String::operator=(const List_String& other) {
 		Clear();
 		Capacity(other.capacity);
 		const auto end = other.data + other.count;
+		//double-pointer progression
     	for (auto dst = data, src = other.data; src != end; ++src, ++dst) {
     		new (dst) std::string(*src);
     	}
@@ -64,7 +65,7 @@ List_String& List_String::operator=(List_String&& other) {
 	List_String tmp(std::move(other));
 	swap(*this, tmp);
 	return *this;
-	//old *this data is deleted automatically at function end (through temp destruction)
+	//old " *this "-related data is deleted automatically at function end (through temp destruction)
 }
 
 
@@ -164,10 +165,10 @@ void List_String::Resize(int new_capacity) {
 	if (new_capacity < count) return; //no change
 
 	std::string* new_data = dataAllocator.allocate(new_capacity);
-
-	for (int i = 0; i < count; i++) {
-		new (new_data + i) std::string(std::move(data[i]));
-		data[i].~string();
+	const auto end = data + count;
+	for (auto dest = new_data, src = data; src != end; ++src, ++dest) {
+		new (dest) std::string(*src); //move data to new location (also clears data from old location)
+		src->~string(); //delete invalid data at old location (does not own any relevant data anymore so can destruct safely)
 	}
 
 	dataAllocator.deallocate(data, capacity);
