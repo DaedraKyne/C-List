@@ -113,33 +113,33 @@ std::string List_String::ToString() const {
 	return result;
 }
 
-
-bool List_String::Contains(const std::string& val) const {
-	return IndexOf(val) != -1;
+std::string* List_String::Find(const std::string& val) {
+	for (int i = 0; i < count; i++) {
+		if (data[i] == val) return &data[i];
+	}
+	return nullptr;
 }
 
-bool List_String::RemoveAt(int index) {
-	if (index < 0) return false;
-	if (index >= count) return false;
-	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
+const std::string* List_String::Find(const std::string& val) const {
+	for (int i = 0; i < count; i++) {
+		if (data[i] == val) return &data[i];
+	}
+	return nullptr;
+}
 
+void List_String::RemoveAt(int index) {
+	if (index < 0 || index >= count) throw std::out_of_range(string("Cannot remove element at out_of_range index: ") + to_string(index) + string("."));
+	
 	std::move(data + index + 1, data + count, data + index);
 	data[--count].~string();
-	return true;
 }
 
-
-int List_String::IndexOf(const std::string& val) const {
-	for (int i = 0; i < count; i++) {
-		if (data[i] == val) return i;
-	}
-	return -1;
-}
 
 
 bool List_String::Remove(const std::string& val) {
-	int index = IndexOf(val);
-	return RemoveAt(index);
+	std::string* ptr = Find(val);
+	if (ptr!=nullptr) RemoveAt(ptr-data);
+	return ptr!=nullptr;
 }
 
 

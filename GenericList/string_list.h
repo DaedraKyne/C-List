@@ -42,8 +42,13 @@ public:
         new (data + count++) std::string(std::forward<Args>(args)...);
     }
 
+    std::string* Find(const std::string& val);
+    const std::string* Find(const std::string& val) const;
+
+
+
     bool Contains(const std::string& val) const;
-    bool RemoveAt(int index);
+    void RemoveAt(int index);
 
     int IndexOf(const std::string& val) const;
 
