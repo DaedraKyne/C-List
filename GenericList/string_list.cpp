@@ -74,29 +74,18 @@ void List_String::Clear() {
 	}
 }
 
+void List_String::ShrinkToFit() {
+	if (capacity == count) return;
+	//sadly, allocators don't support partial deallocation - need to fully resize
+	Resize(count);
+}
+
 
 int List_String::Capacity() const { return capacity; }
 
 void List_String::Capacity(int new_capacity) {
 	if (new_capacity <= capacity) return; //no change
-	if (new_capacity == 0) { //empty non-empty array with no data
-		Clear();
-		dataAllocator.deallocate(data, capacity);
-		data = nullptr;
-		return;
-	};
-
-	std::string* new_data = dataAllocator.allocate(new_capacity);
-
-	for (int i = 0; i < count; i++) {
-		new (new_data + i) std::string(std::move(data[i]));
-		data[i].~string();
-	}
-
-	dataAllocator.deallocate(data, capacity);
-
-	data = new_data;
-	capacity = new_capacity;
+	Resize(new_capacity);
 }
 
 int List_String::Count() const { return count; }
@@ -169,6 +158,22 @@ std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, si
 	}
 
 	return new_data;
+}
+
+void List_String::Resize(int new_capacity) {
+	if (new_capacity < count) return; //no change
+
+	std::string* new_data = dataAllocator.allocate(new_capacity);
+
+	for (int i = 0; i < count; i++) {
+		new (new_data + i) std::string(std::move(data[i]));
+		data[i].~string();
+	}
+
+	dataAllocator.deallocate(data, capacity);
+
+	data = new_data;
+	capacity = new_capacity;
 }
 
 

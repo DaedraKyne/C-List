@@ -28,6 +28,9 @@ public:
     //Remove all elements - maintain capacity
     void Clear();
 
+    //Shrink array capacity down to count
+    void ShrinkToFit();
+
     int Capacity() const;
     int Count() const;
 
@@ -80,6 +83,8 @@ private:
     static std::allocator<std::string> dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
 
     static std::string* CreateDeepCopy(std::string* data, size_t data_size, size_t copy_size);
+
+    void Resize(int new_capacity);
 
 
 };
