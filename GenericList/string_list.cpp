@@ -104,14 +104,14 @@ std::string List_String::ToString() const {
 
 std::string* List_String::Find(const std::string& val) {
 	for (int i = 0; i < count; i++) {
-		if (data[i] == val) return &data[i];
+		if (data[i] == val) return data+i; //TODO: research why &data[i] might get overloaded
 	}
 	return nullptr;
 }
 
 const std::string* List_String::Find(const std::string& val) const {
 	for (int i = 0; i < count; i++) {
-		if (data[i] == val) return &data[i];
+		if (data[i] == val) return data + i; //TODO: research why &data[i] might get overloaded
 	}
 	return nullptr;
 }
