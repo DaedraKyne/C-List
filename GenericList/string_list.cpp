@@ -164,7 +164,7 @@ std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, si
 
 
 	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
-	for (int i = 0; i < copy_size; i++) {
+	for (size_t i = 0; i < copy_size; i++) {
 		new (new_data + i) std::string(data[i]);
 	}
 

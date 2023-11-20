@@ -38,7 +38,7 @@ public:
 
     template<typename... Args>
     void Add(Args&&... args) {
-        if (capacity == count) Capacity(2 * capacity);
+        if (capacity == count) Capacity(std::max(2 * capacity, 1));
         new (data + count++) std::string(std::forward<Args>(args)...);
     }
 
