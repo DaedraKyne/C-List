@@ -73,6 +73,7 @@ void List_String::Clear() {
 	for (int i = 0; i < count; i++) {
 		data[i].~string();
 	}
+	count = 0;
 }
 
 void List_String::ShrinkToFit() {
