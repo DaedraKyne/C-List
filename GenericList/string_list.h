@@ -35,8 +35,11 @@ public:
 
     std::string ToString() const;
 
-    void Add(const std::string& new_val);
-    void Add(std::string&& new_val);
+    template<typename... Args>
+    void Add(Args&&... args) {
+        if (capacity == count) Capacity(2 * capacity);
+        new (data + count++) std::string(std::forward<Args>(args)...);
+    }
 
     bool Contains(const std::string& val) const;
     bool RemoveAt(int index);
@@ -46,8 +49,8 @@ public:
     //Returns true if a relevant element exists, and removes it.
     bool Remove(const std::string& val);
 
-    const std::string& operator[](int index) const { return Get(index); }
-    std::string& operator[](int index) { return Get(index); }
+    const std::string& operator[](int index) const { return data[index]; }
+    std::string& operator[](int index) { return data[index]; }
     const std::string& Get(int index) const;
     std::string& Get(int index);
 

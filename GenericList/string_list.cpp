@@ -35,19 +35,20 @@ List_String::~List_String() {
 }
 
 //Copy constructor
-List_String::List_String(const List_String& other) : capacity(other.capacity), count(other.count) {
-	data = CreateDeepCopy(other.data, other.capacity, other.capacity);
-}
+List_String::List_String(const List_String& other) : 	data(CreateDeepCopy(other.data, other.capacity, other.count)), capacity(other.capacity), count(other.count) {}
 
 //Copy assignement
 List_String& List_String::operator=(const List_String& other) {
-	//Note: other is not a const reference but a copy of the value, allowing for use of swap logic (since "other" will be destroyed after
-	//Long definition:
-		//List_String tmp(other);
-		//swap(*this, tmp);
-		//return *this;
-	//clearer definition:
-	return *this = List_String(other); //calls operator=(&& List_String(&)))
+	if (this != &other) {
+		Clear();
+		Capacity(other.capacity);
+		const auto end = other.data + other.count;
+    	for (auto dst = data, src = other.data; src != end; ++src, ++dst) {
+    		new (dst) std::string(*src);
+    	}
+    	count = other.count;
+	}
+	return *this;
 	
 }
 
@@ -55,13 +56,15 @@ List_String& List_String::operator=(const List_String& other) {
 //Rule of 5
 //R-value references (&&) explained: http://thbecker.net/articles/rvalue_references/section_01.html 
 //basic explanation: if a function argument is &&, whatever it references will stop existing at the end of the function
-List_String::List_String(List_String&& other) : data(nullptr), capacity(0), count(0) {
-	swap(*this, other);
+List_String::List_String(List_String&& other) : data(other.data), capacity(other.capacity), count(other.count) {
+    other.data = nullptr;
+    other.capacity = 0;
+    other.count = 0;
 }
 
 List_String& List_String::operator=(List_String&& other) {
-	//warning for future use: might need to do additional cleaning here if currently controlling external objects (since control will be passed over to other and deleted)
-	swap(*this, other);
+	List_string tmp(std::move(other));
+	swap(*this, tmp);
 	return *this;
 }
 
@@ -70,11 +73,10 @@ List_String& List_String::operator=(List_String&& other) {
 int List_String::Capacity() const { return capacity; }
 
 void List_String::Capacity(int new_capacity) {
-	if (new_capacity < 0) return; //allowed values must be >= 0
-	if (new_capacity < count) return; //can't have shorter capacity than element count
-	if (new_capacity == capacity) return; //no change
+	if (new_capacity <= capacity) return; //no change
 	if (new_capacity == 0) { //empty non-empty array with no data
-		dataAllocator.deallocate(data, capacity); //no need to destruct anything since no constructed data exists
+		Clear();
+		dataAllocator.deallocate(data, capacity);
 		data = nullptr;
 		return;
 	};
@@ -83,6 +85,7 @@ void List_String::Capacity(int new_capacity) {
 
 	for (int i = 0; i < count; i++) {
 		new (new_data + i) std::string(std::move(data[i]));
+		data[i].~string();
 	}
 
 	dataAllocator.deallocate(data, capacity);
@@ -110,14 +113,14 @@ void List_String::Add(const std::string& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
-	new (data + count++) std::string(std::forward<const std::string>(new_val)); //construct new string, pass new_val as const lvalue
+	new (data + count++) std::string(new_val); //construct new string, pass new_val as const lvalue
 }
 void List_String::Add(std::string&& new_val) {
 	if (capacity < count + 1) {
 		Capacity(capacity == 0 ? 1 : capacity * 2); //double array size
 	}
 	//question: is there a way of moving new_val to data[count] without first constructing data[count]?
-	new (data + count++) std::string(std::forward<std::string>(new_val)); //construct new string, pass new_val as rvalue
+	new (data + count++) std::string(std::move(new_val)); //construct new string, pass new_val as rvalue
 }
 
 
@@ -130,12 +133,8 @@ bool List_String::RemoveAt(int index) {
 	if (index >= count) return false;
 	//allowed setting: index = [0, count-1], count > 0 (data is initialized)
 
-	data[index].~string();
-	//Since deleting data, make sure to call data's destructor function in some way to ensure internal pointers/etc are deleted too - here, std::move takes care of it
-	//note: this is only safe if std::move is implemented linearly in ascending order, or by using a temporary buffer, otherwise...
 	std::move(data + index + 1, data + count, data + index);
-	//memmove(data + index, data + index + 1, (count - index - 1) * sizeof(std::string)); //shallow shuffle left
-	count--;
+	data[--count].~string();
 	return true;
 }
 
