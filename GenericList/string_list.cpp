@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#include "string_list.h"'
+#include "string_list.h"
 
 std::allocator<std::string> List_String::dataAllocator;
 
@@ -111,12 +111,14 @@ std::string* List_String::Find(const std::string& val) {
 	return nullptr;
 }
 
+
 const std::string* List_String::Find(const std::string& val) const {
 	for (int i = 0; i < count; i++) {
 		if (data[i] == val) return data + i; //TODO: research why &data[i] might get overloaded
 	}
 	return nullptr;
 }
+
 
 void List_String::RemoveAt(int index) {
 	if (index < 0 || index >= count) throw std::out_of_range(string("Cannot remove element at out_of_range index: ") + to_string(index) + string("."));
@@ -132,6 +134,7 @@ bool List_String::Remove(const std::string& val) {
 	if (ptr!=nullptr) RemoveAt(ptr-data);
 	return ptr!=nullptr;
 }
+
 
 
 const std::string& List_String::Get(int index) const {
@@ -183,6 +186,10 @@ List_String foo(List_String org) {
 	List_String tmp(org);
 	return tmp;
 }
+
+template<typename U>
+bool eq(U v) { return v == "List[processed]"; }
+
 
 
 void Main_Test_List_String() {
@@ -265,6 +272,12 @@ void Main_Test_List_String() {
 	for (const auto& str : string_list) {
 		assert(str.find("[processed]") != std::string::npos);
 	}
+
+	std::cout << string_list.Find([](std::string v) {return v == "List[processed]"; }) << "\n";
+	std::cout << string_list.Find([](std::string v) {return v == "<T>[processed]"; }) << "\n";
+	std::cout << string_list.Find([](std::string v) {return v == "F[processed]"; }) << "\n";
+	std::cout << string_list.Find(eq<string>) << "\n";
+	std::cout << string_list.Find([](auto v) {return eq(v); }) << "\n";
 	std::cout << string_list.ToString() << "\n";
 
 	string_list[0] = "hi";

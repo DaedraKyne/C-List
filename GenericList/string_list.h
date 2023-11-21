@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <cassert>
+#include <functional>
 
 class List_String {
     //note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
@@ -49,7 +50,19 @@ public:
     std::string* Find(const std::string& val);
     const std::string* Find(const std::string& val) const;
 
+    std::string* Find(std::function<bool(std::string)> pred) {
+        for (auto ptr = begin(); ptr < end(); ptr++) {
+            if (pred(*ptr)) return ptr; //TODO: research why &data[i] might get overloaded
+        }
+        return nullptr;
+    }
 
+    const std::string* Find(std::function<bool(std::string)> pred) const {
+        for (auto ptr = begin(); ptr < end(); ptr++) {
+            if (pred(*ptr)) return ptr; //TODO: research why &data[i] might get overloaded
+        }
+        return nullptr;
+    }
 
     bool Contains(const std::string& val) const;
     void RemoveAt(int index);
@@ -58,6 +71,12 @@ public:
 
     //Returns true if a relevant element exists, and removes it.
     bool Remove(const std::string& val);
+
+    bool Remove(std::function<bool(std::string)> pred) {
+        std::string* ptr = Find(pred);
+        if (ptr != nullptr) RemoveAt(ptr - data);
+        return ptr != nullptr;
+    }
 
     const std::string& operator[](int index) const { return data[index]; } //read-only
     std::string& operator[](int index) { return data[index]; } //read+(later)write
