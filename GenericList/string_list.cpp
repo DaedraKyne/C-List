@@ -171,13 +171,10 @@ std::string& List_String::Get(int index) {
 
 
 std::string* List_String::CreateDeepCopy(std::string* data, size_t data_size, size_t copy_size) {
-	if (copy_size > data_size || copy_size < 0) {
-		throw std::out_of_range(string("Cannot copy array of size ") + to_string(copy_size) + string(" onto array of size ") + to_string(copy_size) + string("."));
-	}
+	assert(copy_size <= data_size && data_size >= 0);
+
 	std::string* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr;
 
-
-	//For improved performance, replace copy by memcpy+fill (no deep copy of non-POD objects) or by using a swap method
 	for (size_t i = 0; i < copy_size; i++) {
 		new (new_data + i) std::string(data[i]);
 	}
