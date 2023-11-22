@@ -102,7 +102,7 @@ public:
     //Take in any amount of arguments of any type, then unpack on element construction - allows for creating new data without checking for logic errors (the compiler and the element's constructor will take care of that)
     template<typename... Args>
     void Add(Args&&... args) {
-        if (capacity == count) Capacity(std::max<size_t>(2 * capacity, 1));
+        if (capacity == count) Capacity(std::max(size_t(2) * capacity, size_t(1)));
         new (data + count++) T(std::forward<Args>(args)...);
     }
 
