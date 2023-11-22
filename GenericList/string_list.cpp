@@ -273,11 +273,11 @@ void Main_Test_List_String() {
 		assert(str.find("[processed]") != std::string::npos);
 	}
 
-	std::cout << string_list.Find([](std::string v) {return v == "List[processed]"; }) << "\n";
-	std::cout << string_list.Find([](std::string v) {return v == "<T>[processed]"; }) << "\n";
-	std::cout << string_list.Find([](std::string v) {return v == "F[processed]"; }) << "\n";
-	std::cout << string_list.Find(eq<string>) << "\n";
-	std::cout << string_list.Find([](auto v) {return eq(v); }) << "\n";
+	std::cout << string_list.FindIf([](const auto& v) {return v == "List[processed]"; }) << "\n";
+	std::cout << string_list.FindIf([](const auto& v) {return v == "<T>[processed]"; }) << "\n";
+	std::cout << string_list.FindIf([](const auto& v) {return v == "F[processed]"; }) << "\n";
+	std::cout << string_list.FindIf(eq<string>) << "\n";
+	std::cout << string_list.FindIf([](const auto& v) {return eq(v); }) << "\n";
 	std::cout << string_list.ToString() << "\n";
 
 	string_list[0] = "hi";

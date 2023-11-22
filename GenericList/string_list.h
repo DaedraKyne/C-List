@@ -50,14 +50,16 @@ public:
     std::string* Find(const std::string& val);
     const std::string* Find(const std::string& val) const;
 
-    std::string* Find(std::function<bool(std::string)> pred) {
+    template <typename Predicate>
+    std::string* FindIf(Predicate&& pred) {
         for (auto ptr = begin(); ptr < end(); ptr++) {
             if (pred(*ptr)) return ptr; //TODO: research why &data[i] might get overloaded
         }
         return nullptr;
     }
 
-    const std::string* Find(std::function<bool(std::string)> pred) const {
+    template <typename Predicate>
+    const std::string* FindIf(Predicate&& pred) const {
         for (auto ptr = begin(); ptr < end(); ptr++) {
             if (pred(*ptr)) return ptr; //TODO: research why &data[i] might get overloaded
         }
@@ -72,8 +74,8 @@ public:
     //Returns true if a relevant element exists, and removes it.
     bool Remove(const std::string& val);
 
-    bool Remove(std::function<bool(std::string)> pred) {
-        std::string* ptr = Find(pred);
+    bool RemoveIf(std::function<bool(std::string)> pred) {
+        std::string* ptr = FindIf(pred);
         if (ptr != nullptr) RemoveAt(ptr - data);
         return ptr != nullptr;
     }
