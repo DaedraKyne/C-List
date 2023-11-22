@@ -129,10 +129,30 @@ void List_String::RemoveAt(int index) {
 
 
 
-bool List_String::Remove(const std::string& val) {
-	std::string* ptr = Find(val);
-	if (ptr!=nullptr) RemoveAt(ptr-data);
-	return ptr!=nullptr;
+size_t List_String::Remove(const std::string& val) {
+	//Lazy, simpler way - when changing behaviour, just change it in RemoveIf:
+	/*
+	 * return RemoveIf([](const auto& e) { return e == val; } );
+	 */
+
+	size_t new_count = 0;
+	auto picker = begin(), placer = begin();
+	for (; picker < end(); picker++) {
+		if (!(*picker == val)) {
+			std::swap(*placer, *picker);
+			placer++;
+			new_count++;
+		}
+	}
+	//destruct afterwards to ensure std::swap operates on instantiated objects
+	for (; placer < end(); placer++) {
+		placer->~basic_string();
+	}
+
+	size_t removed = count - new_count;
+	count = new_count;
+
+	return removed;
 }
 
 
@@ -284,6 +304,9 @@ void Main_Test_List_String() {
 	std::cout << string_list.ToString() << "\n";
 
 	string_list.Add("bob");
+	std::cout << string_list.ToString() << "\n";
+
+	string_list.RemoveIf([](const auto& val) {return val.find("[processed]") == std::string::npos;  });
 	std::cout << string_list.ToString() << "\n";
 
 }

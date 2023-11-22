@@ -72,12 +72,40 @@ public:
     int IndexOf(const std::string& val) const;
 
     //Returns true if a relevant element exists, and removes it.
-    bool Remove(const std::string& val);
+    size_t Remove(const std::string& val);
+    
+    template <typename Predicate>
+    size_t RemoveIf(Predicate&& pred) {
+        //Dumb version - O(n^2) time, O(1) space (if removal is O(1) space)
+        /*
+         *  std::string* ptr;
+         *  int deletions = 0;
+         *  while ((ptr = FindIf(pred)) != nullptr) {
+         *      RemoveAt(ptr - data);
+         *      deletions++;
+         *  }
+         *  return deletions;
+         */
+        //idea: double pointers, picker points to next element to check,
+        //                       placer points to next available space
+        size_t new_count = 0;
+        auto picker = begin(), placer = begin();
+        for (; picker < end(); picker++) {
+            if (!pred(*picker)) {
+                std::swap(*placer, *picker);
+                placer++;
+                new_count++;
+            }
+        }
+        //destruct afterwards to ensure std::swap operates on instantiated objects
+        for (; placer < end(); placer++) {
+            placer->~basic_string();
+        }
 
-    bool RemoveIf(std::function<bool(std::string)> pred) {
-        std::string* ptr = FindIf(pred);
-        if (ptr != nullptr) RemoveAt(ptr - data);
-        return ptr != nullptr;
+        size_t removed = count - new_count;
+        count = new_count;
+
+        return removed;
     }
 
     const std::string& operator[](int index) const { return data[index]; } //read-only
