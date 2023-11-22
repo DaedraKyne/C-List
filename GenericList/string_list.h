@@ -6,6 +6,7 @@
 #include <memory>
 #include <cassert>
 #include <functional>
+#include <algorithm>
 
 using namespace std;
 
@@ -67,7 +68,7 @@ public:
 
     //Remove all elements - maintain capacity
     void Clear() {
-        for (int i = 0; i < count; i++) {
+        for (size_t i = 0; i < count; i++) {
             data[i].~T();
         }
         count = 0;
@@ -80,11 +81,11 @@ public:
         Resize(count);
     }
 
-    int Capacity() const { return capacity; }
-    int Count() const { return count; }
+    size_t Capacity() const { return capacity; }
+    size_t Count() const { return count; }
 
     //Sets the capacity of the internal array to new_capacity. If new_capacity is smaller than Count, do nothing.
-    void Capacity(int new_capacity) {
+    void Capacity(size_t new_capacity) {
         if (new_capacity <= capacity) return; //no change
         Resize(new_capacity);
     }
@@ -92,7 +93,7 @@ public:
 
     void Print() const {
         std::cout << "(";
-        for (int i = 0; i < count - 1; i++) {
+        for (size_t i = 0; i < count - 1; i++) {
             std::cout << data[i] << ", ";
         }
         std::cout << data[count - 1] << ")\n";
@@ -101,18 +102,18 @@ public:
     //Take in any amount of arguments of any type, then unpack on element construction - allows for creating new data without checking for logic errors (the compiler and the element's constructor will take care of that)
     template<typename... Args>
     void Add(Args&&... args) {
-        if (capacity == count) Capacity(std::max(2 * capacity, 1));
+        if (capacity == count) Capacity(std::max<size_t>(2 * capacity, 1));
         new (data + count++) T(std::forward<Args>(args)...);
     }
 
     T* Find(const T& val) {
-        for (int i = 0; i < count; i++) {
+        for (size_t i = 0; i < count; i++) {
             if (data[i] == val) return data + i; //TODO: research why &data[i] might get overloaded
         }
         return nullptr;
     }
     const T* Find(const T& val) const {
-        for (int i = 0; i < count; i++) {
+        for (size_t i = 0; i < count; i++) {
             if (data[i] == val) return data + i; //TODO: research why &data[i] might get overloaded
         }
         return nullptr;
@@ -134,7 +135,7 @@ public:
         return nullptr;
     }
 
-    void RemoveAt(int index) {
+    void RemoveAt(size_t index) {
         if (index < 0 || index >= count) throw std::out_of_range(string("Cannot remove element at out_of_range index: ") + to_string(index) + string("."));
 
         std::move(data + index + 1, data + count, data + index);
@@ -174,7 +175,7 @@ public:
         //Dumb version - O(n^2) time, O(1) space (if removal is O(1) space)
         /*
          *  T* ptr;
-         *  int deletions = 0;
+         *  size_t deletions = 0;
          *  while ((ptr = FindIf(pred)) != nullptr) {
          *      RemoveAt(ptr - data);
          *      deletions++;
@@ -203,14 +204,14 @@ public:
         return removed;
     }
 
-    const T& operator[](int index) const { return data[index]; } //read-only
-    T& operator[](int index) { return data[index]; } //read+(later)write
-    const T& Get(int index) const {
+    const T& operator[](size_t index) const { return data[index]; } //read-only
+    T& operator[](size_t index) { return data[index]; } //read+(later)write
+    const T& Get(size_t index) const {
         if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
         return data[index];
     }
-    T& Get(int index) {
+    T& Get(size_t index) {
         if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
 
         return data[index];
@@ -230,8 +231,8 @@ public:
 
 private:
     T* data;
-    int capacity;
-    int count;
+    size_t capacity;
+    size_t count;
 
     static inline std::allocator<T> dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
 
@@ -247,7 +248,7 @@ private:
         return new_data;
     }
 
-    void Resize(int new_capacity) {
+    void Resize(size_t new_capacity) {
         assert(new_capacity >= count); //asserts get removed in release builds
 
         T* new_data = dataAllocator.allocate(new_capacity);
