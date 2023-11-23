@@ -146,45 +146,24 @@ public:
     //Returns true if a relevant element exists, and removes it.
     size_t Remove(const T& val) {
         //Lazy, simpler way - when changing behaviour, just change it in RemoveIf:
-        /*
-         * return RemoveIf([](const auto& e) { return e == val; } );
-         */
+    
+        return RemoveIf([&](const auto& e) { return e == val; } );
+        
 
-        size_t new_count = 0;
-        auto picker = begin(), placer = begin();
-        for (; picker < end(); picker++) {
-            if (!(*picker == val)) {
-                std::swap(*placer, *picker);
-                placer++;
-                new_count++;
-            }
-        }
-        //destruct afterwards to ensure std::swap operates on instantiated objects
-        for (; placer < end(); placer++) {
-            placer->~T();
-        }
-
-        size_t removed = count - new_count;
-        count = new_count;
-
-        return removed;
     }
     
     template <typename Predicate>
     size_t RemoveIf(Predicate&& pred) {
-<<<<<<< HEAD
         //Dumb version - O(n^2) time, O(1) space (if removal is O(1) space)
         /*
-         *  T* ptr;
-         *  size_t deletions = 0;
+         *  std::string* ptr;
+         *  int deletions = 0;
          *  while ((ptr = FindIf(pred)) != nullptr) {
          *      RemoveAt(ptr - data);
          *      deletions++;
          *  }
          *  return deletions;
          */
-=======
->>>>>>> master
         //idea: double pointers, picker points to next element to check,
         //                       placer points to next available space
 
@@ -197,15 +176,9 @@ public:
                 ++placer;
             }
         }
-<<<<<<< HEAD
-        //destruct afterwards to ensure std::swap operates on instantiated objects
-        for (; placer < end(); placer++) {
-            placer->~T();
-=======
 
         for (auto k = placer; k < end(); ++k) {
-            k->~string(); //destructs meaningless data from matched indexes moved to end
->>>>>>> master
+            k->~T(); //destructs meaningless data from matched indexes moved to end
         }
 
         const auto removed = end() - placer;
