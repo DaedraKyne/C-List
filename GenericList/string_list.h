@@ -76,34 +76,25 @@ public:
     
     template <typename Predicate>
     size_t RemoveIf(Predicate&& pred) {
-        //Dumb version - O(n^2) time, O(1) space (if removal is O(1) space)
-        /*
-         *  std::string* ptr;
-         *  int deletions = 0;
-         *  while ((ptr = FindIf(pred)) != nullptr) {
-         *      RemoveAt(ptr - data);
-         *      deletions++;
-         *  }
-         *  return deletions;
-         */
         //idea: double pointers, picker points to next element to check,
         //                       placer points to next available space
-        size_t new_count = 0;
-        auto picker = begin(), placer = begin();
-        for (; picker < end(); picker++) {
+
+        auto placer = FindIf(pred);
+        if (placer == nullptr) return 0;
+
+        for (auto picker = placer + 1; picker < end(); ++picker) {
             if (!pred(*picker)) {
-                std::swap(*placer, *picker);
-                placer++;
-                new_count++;
+                *placer = std::move(*picker); //*picker now contains irrelevant instantiated data
+                ++placer;
             }
         }
-        //destruct afterwards to ensure std::swap operates on instantiated objects
-        for (; placer < end(); placer++) {
-            placer->~basic_string();
+
+        for (auto k = placer; k < end(); ++k) {
+            k->~string(); //destructs meaningless data from matched indexes moved to end
         }
 
-        size_t removed = count - new_count;
-        count = new_count;
+        const auto removed = end() - placer;
+        count -= removed;
 
         return removed;
     }
