@@ -146,24 +146,11 @@ public:
     //Returns true if a relevant element exists, and removes it.
     size_t Remove(const T& val) {
         //Lazy, simpler way - when changing behaviour, just change it in RemoveIf:
-    
         return RemoveIf([&](const auto& e) { return e == val; } );
-        
-
     }
     
     template <typename Predicate>
     size_t RemoveIf(Predicate&& pred) {
-        //Dumb version - O(n^2) time, O(1) space (if removal is O(1) space)
-        /*
-         *  std::string* ptr;
-         *  int deletions = 0;
-         *  while ((ptr = FindIf(pred)) != nullptr) {
-         *      RemoveAt(ptr - data);
-         *      deletions++;
-         *  }
-         *  return deletions;
-         */
         //idea: double pointers, picker points to next element to check,
         //                       placer points to next available space
 
