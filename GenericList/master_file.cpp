@@ -3,7 +3,7 @@
 
 #include <iostream>
 
-#include "string_list.h"
+#include "list.h"
 
 int main()
 {    

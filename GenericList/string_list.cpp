@@ -8,7 +8,7 @@
 #include <cassert>
 
 
-#include "string_list.h"
+#include "list.h"
 
 
 template <typename T>
