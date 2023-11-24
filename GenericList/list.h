@@ -14,7 +14,8 @@
 // Basically, when this header is included, the "using namespace" will be included too, possibly causing un-intended clashes in variable/function/etc.. namess
 // Note: as long as code doesn't #include a .cpp file, it's fine to use using directives in that source file
 
-template <typename T>
+//Generic type, allow for stateful Allocator if user desires it
+template <typename T, typename Allocator = std::allocator<T>>
 class List {
     static_assert(!std::is_void_v<T>, "void type is not allowed");
     static_assert(!std::is_reference_v<T>, "reference type is not allowed");
@@ -23,16 +24,19 @@ class List {
 
     //note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
 public:
-    List() : data(nullptr), capacity(0), count(0) {
+    List() : dataAllocator(), data(nullptr), capacity(0), count(0) {
 
     }
 
+    List(Allocator const& alloc) : dataAllocator(alloc), data(nullptr), capacity(0), count(0)
+
     friend void swap(List& first, List& second) noexcept {
-        //using std::swap;
-        //explanation: calling swap makes it unqualified, meaning if swap(T,T) is specially defined, it is called, otherwise, call std::swap(T,T)
-        swap(first.capacity, second.capacity);
-        swap(first.count, second.count);
-        swap(first.data, second.data);
+        //Purely swap data: since we want the states to remain the same as beforehand, just switched, explicitely use std::swap in case swap(Allocator&, Allocator&) somehow moves memory around
+        //Note: since data is a pointer value, it cannot have a "custom swap friend function" - aka, let's just use std::swap everywhere
+        std::swap(first.dataAllocator, second.dataAllocator);
+        std::swap(first.capacity, second.capacity);
+        std::swap(first.count, second.count);
+        std::swap(first.data, second.data);
     }
 
     //Rule of 3
@@ -41,11 +45,11 @@ public:
         dataAllocator.deallocate(data, capacity);
     }
 
-    //Copy Constructor
-    List(const List& other) : data(CreateDeepCopy(other.data, other.capacity, other.count)),
+    //Copy Constructor - dataAllocator is not copied over as the data allocated is not the same (different memory address, deep copy)
+    List(const List& other) : dataAllocator(), data(CreateDeepCopy(other.data, other.capacity, other.count)),
                               capacity(other.capacity), count(other.count) {}
-    
-    List& operator=(const List& other) { //Copy assignement
+
+    List& operator=(const List& other) { //Copy assignement - keep dataAllocator the same as it was
         if (this != &other) {
             Clear();
             Capacity(other.capacity);
@@ -62,12 +66,13 @@ public:
     //Rule of 5
     //R-value references (&&) explained: http://thbecker.net/articles/rvalue_references/section_01.html 
     //basic explanation: if a function argument is &&, whatever it references will stop existing at the end of the function
-    List(List&& other) noexcept : data(other.data), capacity(other.capacity), count(other.count) {
+    List(List&& other) noexcept : dataAllocator(std::move(other.dataAllocator)), data(other.data), capacity(other.capacity), count(other.count) {
+        //due to using std::move(other.dataAllocator), other.dataAllocator is now unrelated to *this.dataAllocator (and *this.dataAllocated retains all previous info)
         other.data = nullptr;
         other.capacity = 0;
         other.count = 0;
     }
-    List& operator=(List&& other) noexcept {
+    List& operator=(List&& other) noexcept { 
         List tmp(std::move(other));
         swap(*this, tmp);
         return *this;
@@ -213,7 +218,7 @@ private:
     size_t capacity;
     size_t count;
 
-    static inline std::allocator<T> dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
+    Allocator dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
 
     static T* CreateDeepCopy(T* data, size_t data_size, size_t copy_size) {
         assert(copy_size <= data_size && data_size >= 0);
