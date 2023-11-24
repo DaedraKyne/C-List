@@ -28,7 +28,9 @@ public:
 
     }
 
-    List(Allocator const& alloc) : dataAllocator(alloc), data(nullptr), capacity(0), count(0)
+    List(Allocator const& alloc) : dataAllocator(alloc), data(nullptr), capacity(0), count(0) {
+    
+    }
 
     friend void swap(List& first, List& second) noexcept {
         //Purely swap data: since we want the states to remain the same as beforehand, just switched, explicitely use std::swap in case swap(Allocator&, Allocator&) somehow moves memory around
@@ -46,7 +48,7 @@ public:
     }
 
     //Copy Constructor - dataAllocator is not copied over as the data allocated is not the same (different memory address, deep copy)
-    List(const List& other) : dataAllocator(), data(CreateDeepCopy(other.data, other.capacity, other.count)),
+    List(const List& other) : dataAllocator(), data(CreateDeepCopy(other.data, other.capacity, other.count, dataAllocator)),
                               capacity(other.capacity), count(other.count) {}
 
     List& operator=(const List& other) { //Copy assignement - keep dataAllocator the same as it was
@@ -220,10 +222,10 @@ private:
 
     Allocator dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
 
-    static T* CreateDeepCopy(T* data, size_t data_size, size_t copy_size) {
+    static T* CreateDeepCopy(T* data, size_t data_size, size_t copy_size, Allocator alloc) {
         assert(copy_size <= data_size && data_size >= 0);
 
-        T* new_data = data_size > 0 ? dataAllocator.allocate(data_size) : nullptr;
+        T* new_data = data_size > 0 ? alloc.allocate(data_size) : nullptr;
 
         for (size_t i = 0; i < copy_size; i++) {
             new (new_data + i) T(data[i]);
