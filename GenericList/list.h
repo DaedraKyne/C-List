@@ -7,6 +7,7 @@
 #include <cassert>
 #include <functional>
 #include <algorithm>
+#include <type_traits>
 
 // Never use header-wide using directives ("using namespace") in the header!!
 // Explanation: https://stackoverflow.com/questions/5849457/using-namespace-in-c-headers
@@ -15,6 +16,11 @@
 
 template <typename T>
 class List {
+    static_assert(!std::is_void_v<T>, "void type is not allowed");
+    static_assert(!std::is_reference_v<T>, "reference type is not allowed");
+    //C++ Standard §8.3.2/4: There shall be no references to references, no arrays of references, and no pointers to references.
+
+
     //note: elements are value copies of original objects (copy-by-value, not copy-by-reference)
 public:
     List() : data(nullptr), capacity(0), count(0) {
