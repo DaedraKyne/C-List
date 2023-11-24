@@ -180,8 +180,12 @@ public:
             }
         }
 
-        for (auto k = placer; k < end(); ++k) {
-            k->~T(); //destructs meaningless data from matched indexes moved to end
+        //if constexpr is evaluated at compile time - eg: List<int> won't have the following code when compiled
+        if constexpr (!std::is_trivially_destructible<T>::value) { //those that are don't have non-empty destructors to call
+            std::cout << "Not trivially destructible!" << "\n";
+            for (auto k = placer; k < end(); ++k) {
+                k->~T(); //destructs meaningless data from matched indexes moved to end
+            }
         }
 
         const auto removed = end() - placer;
