@@ -3,6 +3,7 @@
 #include "../GenericList/list.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
+using namespace std;
 
 namespace GenericListTest
 {

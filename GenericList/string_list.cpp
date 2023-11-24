@@ -105,7 +105,7 @@ void Main_Test_List_String() {
 	std::cout << string_list.FindIf([](const auto& v) {return v == "List[processed]"; }) << "\n";
 	std::cout << string_list.FindIf([](const auto& v) {return v == "<T>[processed]"; }) << "\n";
 	std::cout << string_list.FindIf([](const auto& v) {return v == "F[processed]"; }) << "\n";
-	std::cout << string_list.FindIf(eq<string>) << "\n";
+	std::cout << string_list.FindIf(eq<std::string>) << "\n";
 	std::cout << string_list.FindIf([](const auto& v) {return eq(v); }) << "\n";
 	string_list.Print();
 

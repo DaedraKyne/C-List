@@ -8,8 +8,10 @@
 #include <functional>
 #include <algorithm>
 
-using namespace std;
-
+// Never use header-wide using directives ("using namespace") in the header!!
+// Explanation: https://stackoverflow.com/questions/5849457/using-namespace-in-c-headers
+// Basically, when this header is included, the "using namespace" will be included too, possibly causing un-intended clashes in variable/function/etc.. namess
+// Note: as long as code doesn't #include a .cpp file, it's fine to use using directives in that source file
 
 template <typename T>
 class List {
@@ -20,6 +22,7 @@ public:
     }
 
     friend void swap(List& first, List& second) noexcept {
+        //using std::swap;
         //explanation: calling swap makes it unqualified, meaning if swap(T,T) is specially defined, it is called, otherwise, call std::swap(T,T)
         swap(first.capacity, second.capacity);
         swap(first.count, second.count);
@@ -136,7 +139,7 @@ public:
     }
 
     void RemoveAt(size_t index) {
-        if (index < 0 || index >= count) throw std::out_of_range(string("Cannot remove element at out_of_range index: ") + to_string(index) + string("."));
+        if (index < 0 || index >= count) throw std::out_of_range(std::string("Cannot remove element at out_of_range index: ") + std::to_string(index) + std::string("."));
 
         std::move(data + index + 1, data + count, data + index);
         data[--count].~T();
@@ -177,12 +180,12 @@ public:
     const T& operator[](size_t index) const { return data[index]; } //read-only
     T& operator[](size_t index) { return data[index]; } //read+(later)write
     const T& Get(size_t index) const {
-        if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
+        if (index >= count || index < 0) throw std::out_of_range(std::string("Cannot get element at out_of_range index: ") + std::to_string(index) + std::string(")"));
 
         return data[index];
     }
     T& Get(size_t index) {
-        if (index >= count || index < 0) throw std::out_of_range(string("Cannot get element at out_of_range index: ") + to_string(index) + string(")"));
+        if (index >= count || index < 0) throw std::out_of_range(std::string("Cannot get element at out_of_range index: ") + std::to_string(index) + std::string(")"));
 
         return data[index];
     }
