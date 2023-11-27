@@ -48,7 +48,7 @@ public:
     }
 
     //Copy Constructor - dataAllocator is not copied over as the data allocated is not the same (different memory address, deep copy)
-    List(const List& other) : dataAllocator(), data(CreateDeepCopy(other.data, other.capacity, other.count, dataAllocator)),
+    List(const List& other) : dataAllocator(), data(CreateDeepCopy(other, dataAllocator)),
                               capacity(other.capacity), count(other.count) {}
 
     List& operator=(const List& other) { //Copy assignement - keep dataAllocator the same as it was
