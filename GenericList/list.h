@@ -48,7 +48,8 @@ public:
     }
 
     //Copy Constructor - dataAllocator is not copied over as the data allocated is not the same (different memory address, deep copy)
-    List(const List& other) : dataAllocator(), data(CreateDeepCopy(other, dataAllocator)),
+    //TODO: look into std::allocator_traits
+    List(const List& other) : dataAllocator(other.dataAllocator), data(CreateDeepCopy(other, dataAllocator)),
                               capacity(other.capacity), count(other.count) {}
 
     List& operator=(const List& other) { //Copy assignement - keep dataAllocator the same as it was
@@ -226,8 +227,8 @@ private:
     Allocator dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
 
     static T* CreateDeepCopy(const List& list, Allocator& alloc) {
-        size_t capacity = list.Capacity();
-        size_t count = list.Count();
+        size_t capacity = list.capacity;
+        size_t count = list.count;
 
         assert(count <= capacity && capacity >= 0);
 
