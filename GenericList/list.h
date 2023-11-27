@@ -182,7 +182,6 @@ public:
 
         //if constexpr is evaluated at compile time - eg: List<int> won't have the following code when compiled
         if constexpr (!std::is_trivially_destructible<T>::value) { //those that are don't have non-empty destructors to call
-            std::cout << "Not trivially destructible!" << "\n";
             for (auto k = placer; k < end(); ++k) {
                 k->~T(); //destructs meaningless data from matched indexes moved to end
             }
@@ -226,13 +225,16 @@ private:
 
     Allocator dataAllocator; //not actually necessary to maintain same allocator throughout program as allocators can allocate/deallocate any data
 
-    static T* CreateDeepCopy(T* data, size_t data_size, size_t copy_size, Allocator alloc) {
-        assert(copy_size <= data_size && data_size >= 0);
+    static T* CreateDeepCopy(const List& list, Allocator& alloc) {
+        size_t capacity = list.Capacity();
+        size_t count = list.Count();
 
-        T* new_data = data_size > 0 ? alloc.allocate(data_size) : nullptr;
+        assert(count <= capacity && capacity >= 0);
 
-        for (size_t i = 0; i < copy_size; i++) {
-            new (new_data + i) T(data[i]);
+        T* new_data = capacity > 0 ? alloc.allocate(capacity) : nullptr;
+
+        for (size_t i = 0; i < count; i++) {
+            new (new_data + i) T(list[i]);
         }
 
         return new_data;
