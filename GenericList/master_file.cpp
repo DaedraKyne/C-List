@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "list.h"
+#include "string_list.h"
 
 int main()
 {    
