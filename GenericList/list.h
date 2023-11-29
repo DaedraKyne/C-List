@@ -56,6 +56,7 @@ public:
         if (this != &other) {
             Clear();
             dataAllocator.deallocate(data, capacity);
+            data = nullptr;
             dataAllocator = other.dataAllocator;
             Capacity(other.capacity);
             const auto end = other.data + other.count;
