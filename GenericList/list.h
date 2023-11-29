@@ -55,6 +55,9 @@ public:
     List& operator=(const List& other) { //Copy assignement - keep dataAllocator the same as it was
         if (this != &other) {
             Clear();
+            dataAllocator.deallocate(data, capacity);
+            data = nullptr;
+            dataAllocator = other.dataAllocator;
             Capacity(other.capacity);
             const auto end = other.data + other.count;
             //double-pointer progression
